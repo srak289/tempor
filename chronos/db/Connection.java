@@ -12,4 +12,22 @@ public class ConnectionManager {
             throw e;
         }
     }
+
+    /**
+     * Initialize an empty database for our app
+     */
+    public void setupTables(self) {
+
+        String sql = "CREATE TABLE IF NOT EXISTS employees (\n"  
+                + " id integer PRIMARY KEY,\n"  
+                + " name text NOT NULL,\n"  
+                + " capacity real\n"  
+                + ");";  
+          
+        try {  
+            self.conn.createStatement().execute(sql);  
+        } catch (SQLException e) {  
+            System.out.println(e.getMessage());  
+        }  
+    }  
 }

@@ -12,3 +12,11 @@
   * [x] have to look at java's sqlite support
 
 
+### Resources
+
+* https://www.w3schools.com/java/java_interface.asp
+* https://www.sqlitetutorial.net/sqlite-java/
+* https://www.tutorialspoint.com/sqlite/sqlite_java.htm
+* https://ask.replit.com/t/help-with-java-sqlite-3-in-replit/11189
+  * https://replit.com/@drybowser48/Spirit-Fight-Arena-Legends-WIP#UserDatabase.java
+* https://www.javatpoint.com/java-sqlite
