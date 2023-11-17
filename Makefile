@@ -1,8 +1,8 @@
-all:
-	echo "yes"
-
 build:
-	echo "yes"
+	$(MAKE) -C src/
+
+run: build
+	java src/Main
 
 clean:
-	echo "clean"
+	$(MAKE) -C src/ clean

@@ -1,4 +1,3 @@
-# Timekeeper
 # Time tracking system
 
 * The user should be able to add new entries
@@ -10,6 +9,24 @@
 
 * database should be either Sqlite or some custom binary file packed
   * [x] have to look at java's sqlite support
+
+
+## Design
+
+* initial implementation will be running the program to load a shell
+  * the shell will provide a rudimentary CLI loop
+* CLI loop
+  * should allow open/close of different DB
+  * should have default DB path
+* select current project
+* list projects
+* list codes
+* print current time on current code
+* list current code / project
+* compute hours for period
+* compute hours for longer given period
+* save database for indefinite period
+* truncate database
 
 
 ### Resources
