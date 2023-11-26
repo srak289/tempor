@@ -6,7 +6,7 @@ public class ConnectionManager {
 
     public ConnectionManager() {
         try {
-            conn = DriverManager.getConnection(self.url);
+            conn = DriverManager.getConnection(this.url);
         } catch(SQLException e) {
             System.out.println(e.getStackTrace());
             throw e;
@@ -16,7 +16,7 @@ public class ConnectionManager {
     /**
      * Initialize an empty database for our app
      */
-    public void setupTables(self) {
+    public void setupTables() {
 
         String sql = "CREATE TABLE IF NOT EXISTS employees (\n"  
                 + " id integer PRIMARY KEY,\n"  
@@ -25,7 +25,7 @@ public class ConnectionManager {
                 + ");";  
           
         try {  
-            self.conn.createStatement().execute(sql);  
+            this.conn.createStatement().execute(sql);  
         } catch (SQLException e) {  
             System.out.println(e.getMessage());  
         }  

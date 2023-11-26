@@ -1,6 +1,6 @@
 build:
 	-mkdir .jclass
-	javac -cp ".:./argparse4j-0.9.0.jar" -d .jclass Main.java
+	find . -name \*.java | xargs -I '{}' javac -cp ".:./argparse4j-0.9.0.jar" -d .jclass '{}'
 
 clean:
 	rm -rf .jclass

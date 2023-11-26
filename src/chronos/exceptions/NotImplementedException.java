@@ -1,4 +1,4 @@
-import chronos.exception.ChronosException;
+import chronos.exceptions.ChronosException;
 
 class NotImplementedException extends ChronosException {
     public NotImplementedException() {}

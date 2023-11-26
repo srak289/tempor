@@ -1,9 +1,9 @@
 import java.util.ArrayList;
 
-import chronos.models.*;
+import chronos.models.Tag;
 
 
-class Task {
+public class Task {
     private int id;
     private String name;
     private String text;
