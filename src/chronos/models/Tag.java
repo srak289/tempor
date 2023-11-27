@@ -1,6 +1,8 @@
+package chronos.models;
+
 public class Tag {
     private int id;
-    private String text;
+    private String name;
 
     public Tag() {
     }

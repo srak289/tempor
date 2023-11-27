@@ -1,3 +1,5 @@
+package chronos.exceptions;
+
 import chronos.exceptions.ChronosException;
 
 class NotImplementedException extends ChronosException {

@@ -1,3 +1,5 @@
+package chronos.models;
+
 import java.util.ArrayList;
 
 import chronos.models.Tag;

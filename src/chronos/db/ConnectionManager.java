@@ -1,4 +1,8 @@
-import java.io.BufferedReader;
+package chronos.db;
+
+import chronos.exceptions.ChronosDatabaseException;
+
+import java.io.*;
 import java.sql.*;
 
 public class ConnectionManager {

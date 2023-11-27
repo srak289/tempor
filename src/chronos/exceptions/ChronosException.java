@@ -1,3 +1,5 @@
+package chronos.exceptions;
+
 import java.lang.Exception;
 
 class ChronosException extends Exception {
