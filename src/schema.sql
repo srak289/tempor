@@ -1,5 +1,3 @@
-BEGIN;
-
 CREATE TABLE IF NOT EXISTS task (
     id              INTEGER
         PRIMARY KEY,
@@ -35,36 +33,36 @@ CREATE TABLE IF NOT EXISTS task_tags (
         ON DELETE CASCADE
 );
 
-CREATE TRIGGER IF NOT EXISTS trg_task_set_time_created
-    AFTER INSERT ON task
-    BEGIN
-        UPDATE task
-        SET time_created = CURRENT_TIMESTAMP
-        WHERE id = new.id;
-    END
-;
+--CREATE TRIGGER IF NOT EXISTS trg_task_set_time_created
+--    AFTER INSERT ON task
+--    BEGIN
+--        UPDATE task
+--        SET time_created = CURRENT_TIMESTAMP
+--        WHERE id = new.id;
+--    END
+--;
 
-CREATE TRIGGER IF NOT EXISTS trg_task_calculate_time_worked
-    AFTER UPDATE OF in_progress ON task
-    BEGIN
-        -- test this trigger
-        CASE WHEN (
-            old.in_progress = True
-            AND new.in_progress = NULL
-        ) THEN
-            UPDATE task
-            --TODO
-            SET time_stopped = CURRENT_TIMESTAMP,
-            time_worked = time_started - time_stopped
-            WHERE id = old.id;
-        ELSE
-            -- The only other state is to set from NULL to True
-            UPDATE task
-            SET time_started = CURRENT_TIMESTAMP
-            WHERE id = old.id;
-        END
-    END
-;
+--CREATE TRIGGER IF NOT EXISTS trg_task_calculate_time_worked
+--    AFTER UPDATE OF in_progress ON task
+--    BEGIN
+--        -- test this trigger
+--        CASE WHEN (
+--            old.in_progress = True
+--            AND new.in_progress = NULL
+--        ) THEN
+--            UPDATE task
+--            --TODO
+--            SET time_stopped = CURRENT_TIMESTAMP,
+--            time_worked = time_started - time_stopped
+--            WHERE id = old.id;
+--        ELSE
+--            -- The only other state is to set from NULL to True
+--            UPDATE task
+--            SET time_started = CURRENT_TIMESTAMP
+--            WHERE id = old.id;
+--        END
+--    END
+--;
 
 CREATE VIEW IF NOT EXISTS task_join_tags AS
     SELECT ta.name AS task_name, GROUP_CONCAT(tg.name) AS task_tags
@@ -74,9 +72,7 @@ CREATE VIEW IF NOT EXISTS task_join_tags AS
         GROUP BY ta.name
 ;
 
-CREATE VIEW IF NOT EXISTS time_spent AS
-    -- TODO
-    SELECT * from task
-;
-
-COMMIT;
+--CREATE VIEW IF NOT EXISTS time_spent AS
+--    -- TODO
+--    SELECT * from task
+--;

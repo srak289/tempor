@@ -4,37 +4,109 @@ import chronos.exceptions.ChronosDatabaseException;
 
 import java.io.*;
 import java.sql.*;
+import java.util.ArrayList;
 
 public class ConnectionManager {
     private Connection conn;
     private static String url = "jdbc:sqlite:time.db";
 
-    public ConnectionManager() {
+    // default constuctor
+    public ConnectionManager() {}
+
+    public ConnectionManager(String url) {
+        this.url = url;
+    }
+
+    /**
+     * Connect to the database
+     * Use the default file location if none given
+     */
+    public void connect() throws ChronosDatabaseException {
         try {
-            conn = DriverManager.getConnection(this.url);
+            try {
+                Class.forName("org.sqlite.JDBC");
+            } catch (ClassNotFoundException e) {
+                throw new ChronosDatabaseException(e);
+            }
+            this.conn = DriverManager.getConnection(this.url);
         } catch(SQLException e) {
-            System.out.println(e.getStackTrace());
-            throw e;
+            throw new ChronosDatabaseException(e);
         }
     }
 
     /**
-     * Initialize an empty database for our app
+     * Initialize the database for our app
      */
-    public void setupTables() {
+    public void setupTables() throws ChronosDatabaseException {
 
-        // get resource from schema.sql
         try {  
-            BufferedReader reader = new BufferedReader(
-                ConnectionManager
-                .class
-                .getResourceAsStream("/schema.sql")
-            );
-            sql = reader.lines();
+            Statement stmt = this.conn.createStatement();
 
-            this.conn.createStatement().execute(sql);  
+            try {
+                BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(
+                        this.getClass().getResourceAsStream("schema.sql")
+                    )
+                );
+                String line, sql = "";
+                // read table statements from schema.sql and batch them
+                while ((line = reader.readLine()) != null) {
+                    if (
+                        line.startsWith("--") ||
+                        line.isEmpty()
+                    ) {
+                        // System.out.println("Skipping empty or commented line");
+                        continue;
+                    } else if (line.endsWith(";")) {
+                        sql += line+"\n";
+                        // System.out.println("Adding batch statement\n"+sql);
+                        stmt.addBatch(sql);
+                        sql = "";
+                    } else {
+                        // System.out.println("Concat line\n"+line);
+                        sql += line+"\n";
+                    }
+                }
+            } catch (IOException e) {
+                throw new ChronosDatabaseException(e);
+            }
+
+            // System.out.println("Execute batch");
+            stmt.executeBatch();
         } catch (SQLException e) {  
-            System.out.println(e.getMessage());  
+            throw new ChronosDatabaseException(e);
         }  
     }  
+
+    public void create() throws ChronosDatabaseException {
+        try {
+            Statement stmt = this.conn.createStatement();
+        } catch (SQLException e) {
+            throw new ChronosDatabaseException(e);
+        }
+    }
+
+    public void read() throws ChronosDatabaseException {
+        try {
+            Statement stmt = this.conn.createStatement();
+        } catch (SQLException e) {
+            throw new ChronosDatabaseException(e);
+        }
+    }
+
+    public void update() throws ChronosDatabaseException {
+        try {
+            Statement stmt = this.conn.createStatement();
+        } catch (SQLException e) {
+            throw new ChronosDatabaseException(e);
+        }
+    }
+
+    public void delete() throws ChronosDatabaseException {
+        try {
+            Statement stmt = this.conn.createStatement();
+        } catch (SQLException e) {
+            throw new ChronosDatabaseException(e);
+        }
+    }
 }
