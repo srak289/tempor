@@ -1,3 +1,4 @@
+import java.io.BufferedReader;
 import java.sql.*;
 
 public class ConnectionManager {
@@ -18,13 +19,15 @@ public class ConnectionManager {
      */
     public void setupTables() {
 
-        String sql = "CREATE TABLE IF NOT EXISTS employees (\n"  
-                + " id integer PRIMARY KEY,\n"  
-                + " name text NOT NULL,\n"  
-                + " capacity real\n"  
-                + ");";  
-          
+        // get resource from schema.sql
         try {  
+            BufferedReader reader = new BufferedReader(
+                ConnectionManager
+                .class
+                .getResourceAsStream("/schema.sql")
+            );
+            sql = reader.lines();
+
             this.conn.createStatement().execute(sql);  
         } catch (SQLException e) {  
             System.out.println(e.getMessage());  

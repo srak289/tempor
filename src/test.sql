@@ -1,3 +1,5 @@
+BEGIN;
+
 INSERT INTO task (id, name, in_progress, time_created) VALUES
     (0, 'Take out trash', True, CURRENT_TIMESTAMP),
     (1, 'Do homework', NULL, CURRENT_TIMESTAMP),
@@ -24,3 +26,5 @@ INSERT INTO task_tags (task_id, tag_id) VALUES
     (4, 2),
     (5, 0),
     (3, 1);
+
+COMMIT;
