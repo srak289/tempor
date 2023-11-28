@@ -7,49 +7,79 @@ import chronos.models.*;
 import net.sourceforge.argparse4j.*;
 import net.sourceforge.argparse4j.inf.*;
 
-import java.util.Scanner;
+import org.jboss.jreadline.console.*;
+import org.jboss.jreadline.console.settings.Settings;
+import org.jboss.jreadline.complete.*;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class Main {
 
+    private String[] commands = {"help", "new", "clear", "cls", "?"};
+
     void showHelp() {
-    }
-
-    void tabComplete() {
-    }
-
-    void clearScreen() {
     }
 
     public static void main(String[] args) {
 
         ArgumentParser ap = ArgumentParsers.newFor("chronos").build();
-        ap.addArgument("--cli");
-        System.out.println("What");
+        ap.addArgument("--dbpath");
         try {
-            System.out.println(ap.parseArgs(args));
+            Namespace parsed_args = ap.parseArgs(args);
+            // System.out.println("Parsed args \""+parsed_args+"\"");
         } catch(ArgumentParserException e) {
             e.printStackTrace();
             System.exit(1);
         }
         // end parsing
 
-        ConnectionManager cm = new ConnectionManager();
+        DatabaseClient db = new DatabaseClient();
         try {
-            cm.connect();
-            cm.setupTables();
+            db.connect();
+            db.setupTables();
         } catch (ChronosDatabaseException e) {
             e.printStackTrace();
             System.exit(1);
         }
 
-        Scanner stdin = new Scanner(System.in);
-        String buf;
+        Completion completer = new Completion() {
+            @Override
+            public void complete(CompleteOperation co) {
+            }
+        };
 
-        while(true) {
-            System.out.print("chronos> ");
-            buf = stdin.nextLine();
-            System.out.print("You entered "+buf);
+        try {
+            Console console = new Console();
+            ConsoleOutput line;
+            while ((line = console.read("chronos> ")) != null) {
+                    console.pushToStdOut("======>\"" +line.getBuffer()+ "\"\n");
+                if (
+                    line.getBuffer().equalsIgnoreCase("quit") ||
+                    line.getBuffer().equalsIgnoreCase("exit")
+                ) {
+                    try {
+                        console.stop();
+                    } catch (Exception e) {}
+                    System.exit(0);
+                } else if (
+                    line.getBuffer().equalsIgnoreCase("help") ||
+                    line.getBuffer().equalsIgnoreCase("?")
+                ) {
+                    console.pushToStdOut("the help\n");
+                } else if (
+                    line.getBuffer().equalsIgnoreCase("cls") ||
+                    line.getBuffer().equalsIgnoreCase("clear")
+                ) {
+                    console.clear();
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(1);
         }
     }
 }
