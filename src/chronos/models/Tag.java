@@ -1,12 +1,12 @@
 package chronos.models;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
-import chronos.models.Serialize;
 import chronos.models.Task;
 
 
-public class Tag implements Serialize {
+public class Tag {
     private int id;
     private String name;
     private ArrayList<Task> tasks;
@@ -14,10 +14,10 @@ public class Tag implements Serialize {
     public Tag() {
     }
 
-    public static class Builder() {
+    public static class Builder {
         private int id;
         private String name;
-        private ArrayList<Task> tags;
+        private ArrayList<Task> tasks;
 
         public Builder id(int id) { this.id = id; return this; }
         public Builder name(String name) { this.name = name; return this; }
@@ -36,16 +36,14 @@ public class Tag implements Serialize {
         this.tasks = builder.tasks;
     }
 
-    @Override
-    public Tag fromColumns(HashMap<String, Object> args) {
-        return Tag.Builder()
+    public static Tag fromColumns(HashMap<String, Object> args) {
+        return new Tag.Builder()
                 .id(args.get("id"))
                 .name(args.get("name"))
                 .tasks(args.get("tasks"))
                 .build();
     }
 
-    @Override
     public HashMap<String, Object> toColumns() {
         HashMap<String, Object> ret = new HashMap<String, Object>();
         ret.put("id", this.id);

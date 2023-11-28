@@ -2,12 +2,12 @@ package chronos.models;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import chronos.models.Tag;
-import chronos.models.Serialize;
 
 
-public class Task implements Serialize {
+public class Task {
     private int id;
     private String name;
     private String text;
@@ -22,11 +22,11 @@ public class Task implements Serialize {
     public Task() {
     }
 
-    public static class Builder() {
+    public static class Builder {
         private int id;
         private String name;
         private String text;
-        private boolean in_progress = False;
+        private boolean in_progress;
         private LocalDateTime time_created;
         private LocalDateTime time_stopped;
         private LocalDateTime time_started;
@@ -77,9 +77,8 @@ public class Task implements Serialize {
         this.tags = builder.tags;
     }
 
-    @Override
-    public Task fromColumns(HashMap<String, Object> args) {
-        return Task.Builder()
+    public static Task fromColumns(HashMap<String, Object> args) {
+        return new Task.Builder()
                 .id(args.get("id"))
                 .name(args.get("name"))
                 .text(args.get("text"))
@@ -93,7 +92,6 @@ public class Task implements Serialize {
                 .build();
     }
 
-    @Override
     public HashMap<String, Object> toColumns() {
         HashMap<String, Object> ret = new HashMap<String, Object>();
         ret.put("id", this.id);
