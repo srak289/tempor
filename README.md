@@ -37,3 +37,4 @@
 * https://ask.replit.com/t/help-with-java-sqlite-3-in-replit/11189
   * https://replit.com/@drybowser48/Spirit-Fight-Arena-Legends-WIP#UserDatabase.java
 * https://www.javatpoint.com/java-sqlite
+* https://repository.jboss.org/nexus/content/repositories/releases/org/jboss/
