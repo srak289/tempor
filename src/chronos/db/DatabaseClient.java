@@ -6,14 +6,15 @@ import java.io.*;
 import java.sql.*;
 import java.util.ArrayList;
 
-public class ConnectionManager {
+
+public class DatabaseClient {
     private Connection conn;
     private static String url = "jdbc:sqlite:time.db";
 
     // default constuctor
-    public ConnectionManager() {}
+    public DatabaseClient() {}
 
-    public ConnectionManager(String url) {
+    public DatabaseClient(String url) {
         this.url = url;
     }
 
