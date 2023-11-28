@@ -3,8 +3,9 @@ ifeq (run,$(firstword $(MAKECMDGOALS)))
   $(eval $(RUN_ARGS):;@:)
 endif
 
-SPACE =
-SPACE +=
+E =
+SPACE = $E $E
+
 JARURLS != cat JARURL.txt
 JARS := $(notdir $(JARURLS))
 JARSOURCES := $(patsubst %,./.jar/%,$(JARS))
@@ -20,12 +21,6 @@ build: .jclass $(JARSOURCES) $(OBJS)
 .jclass:
 	@mkdir .jclass
 
-.PHONY: jars
-jars:
-	@echo $(JARS)
-	@echo $(JARSOURCES)
-	@echo $(JARURLS)
-
 .jclass/%.class: %.java
 	javac -cp ".:$(JARCLASSPATH)" -g -d .jclass $<
 
@@ -39,12 +34,10 @@ debug: build
 
 .PHONY: clean
 clean:
-	rm -rf .jclass main.jar
+	rm -rf .jclass chronos.jar
 
 .PHONY: rebuild
 rebuild: clean build
-
-#sources: $(JARURLS)
 
 .PHONY: runjar
 runjar: chronos.jar
@@ -53,20 +46,23 @@ runjar: chronos.jar
 .PHONY: jar
 jar: chronos.jar
 
-chronos.jar: rebuild
+chronos.jar: build
 	mkdir jarbuild
 	cp -r .jar/* jarbuild
-	#for J in $(JARS); do (cd jarbuild && jar xf $$J net)
-	(cd jarbuild && jar xf sqlite-jdbc-3.42.0.0.jar org)
-	(cd jarbuild && jar xf jreadline-0.20.jar org)
+	for J in $(JARS); do (cd jarbuild && jar xf $$J); done
 	(cd jarbuild && rm *.jar)
 	cp -r .jclass/* jarbuild
 	cp MANIFEST.MF jarbuild
-	jar cfm chronos.jar MANIFEST.MF -C jarbuild .
+	jar cfm chronos.jar MANIFEST.MF -C jarbuild chronos -C jarbuild org -C jarbuild net
 	rm -rf jarbuild
+
+.PHONY: sources
+sources: $(JARSOURCES)
 
 .jar:
 	@mkdir .jar
 
 .jar/%.jar: .jar
-	echo $< $@ $^
+	$(eval JARURL=$(shell grep $(patsubst .jar/%,%,$@) JARURL.txt))
+	wget $(JARURL) -O $@
+	touch $@
