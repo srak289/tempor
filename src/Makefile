@@ -16,10 +16,10 @@ OBJS := $(patsubst %.java,.jclass/%.class,$(SRCS))
 
 .PHONY: build
 build: .jclass $(JARSOURCES) $(OBJS)
-	@cp schema.sql .jclass/chronos/db/
+	cp schema.sql .jclass/chronos/db/
 
 .jclass:
-	@mkdir .jclass
+	mkdir .jclass
 
 .jclass/%.class: %.java
 	javac -cp ".:$(JARCLASSPATH)" -g -d .jclass $<
@@ -60,7 +60,7 @@ chronos.jar: build
 sources: $(JARSOURCES)
 
 .jar:
-	@mkdir .jar
+	mkdir .jar
 
 .jar/%.jar: .jar
 	$(eval JARURL=$(shell grep $(patsubst .jar/%,%,$@) JARURL.txt))
