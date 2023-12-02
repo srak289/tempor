@@ -53,9 +53,9 @@ public class Console implements Completion {
         // we'll use reflection to call the function referenced in this map
         this.commands.put("help", "showHelp");
         this.commands.put("?", "showHelp");
-        this.commands.put("quit", null);
-        this.commands.put("clear", null);
-        this.commands.put("cls", null);
+        this.commands.put("quit", "quitConsole");
+        this.commands.put("clear", "clearConsole");
+        this.commands.put("cls", "clearConsole");
 
         this.commands.put("create", null);
         this.commands.put("delete", null);
@@ -103,58 +103,56 @@ public class Console implements Completion {
         co.setCompletionCandidates(completions);
     }
 
-    private void showHelp(String args) {
-        System.out.println("This is the help");
+    private void showHelp(String args) throws IOException {
+        this.print("This is the help");
     }
 
-    private void showConnection(String args) {
-        System.out.println("The connection");
+    private void showConnection(String args) throws IOException {
+        this.print("The connection");
     }
 
-    public void run() throws IOException {
+    private void quitConsole(String args) {
+        try {
+            this.console.stop();
+        } catch (Exception e) {}
+        System.exit(0);
+    }
+
+    private void clearConsole(String args) throws IOException {
+        this.console.clear();
+    }
+
+    /**
+     * Print to our console
+     */
+    private void print(String line) throws IOException {
+        this.console.pushToStdOut(line+"\n");
+    }
+
+    public void run() throws 
+        IOException,
+        InvocationTargetException,
+        IllegalAccessException,
+        NoSuchMethodException
+    {
         ConsoleOutput line;
         String buf = "";
         String cmd = "";
         while ((line = console.read("chronos> ")) != null) {
 
-            // perhaps we'll end up with something like
-            // for key : commands.keySet
-            // if key.equals(buf)
-            // commands.get(key).call() or whatever
-            // commands.get(key).callWithArgs(console, buf.substring()) or whatever
-            // we might substring to get the important args from the last part
-            // of the command
-
             buf = line.getBuffer().trim();
-            this.console.pushToStdOut("======>\"" +buf+ "\"\n");
+            // for debugging
+            this.print("DBG: Received "+buf);
 
-            if (buf.equalsIgnoreCase("quit")) {
-                try {
-                    this.console.stop();
-                } catch (Exception e) {}
-                System.exit(0);
-
-            } else if (buf.equalsIgnoreCase("clear")){
-                this.console.clear();
+            cmd = this.commands.get(buf);
+            if (cmd == null) {
+                this.print("E: No such commamd "+buf);
             } else {
-                try {
-                    cmd = this.commands.get(buf);
-                    if (cmd == null) {
-                        System.out.println("No commamd "+buf);
-                    } else {
-                        //System.out.println(this.getClass().getDeclaredMethod(cmd, String.class));
-                        Console.class.getDeclaredMethod(cmd, String.class).invoke(this, cmd);
-                    }
-                } catch (InvocationTargetException e) {
-                    e.printStackTrace();
-                    System.exit(1);
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                    System.exit(1);
-                } catch (NoSuchMethodException e) {
-                    e.printStackTrace();
-                    System.exit(1);
-                }
+                // we use reflection to call the method specified in the command hashmap
+                //System.out.println(this.getClass().getDeclaredMethod(cmd, String.class));
+                this.getClass()
+                    .getDeclaredMethod(cmd, String.class)
+                    .invoke(this, cmd);
             }
         }
     }

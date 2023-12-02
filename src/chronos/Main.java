@@ -1,6 +1,7 @@
 package chronos;
 
 import java.io.IOException;
+import java.lang.reflect.*;
 
 import chronos.console.Console;
 import chronos.db.*;
@@ -15,7 +16,10 @@ public class Main {
     public static void main(String[] args) throws
         IOException,
         ChronosDatabaseException,
-        ArgumentParserException
+        ArgumentParserException,
+        InvocationTargetException,
+        IllegalAccessException,
+        NoSuchMethodException
     {
         // any of these exceptions crash our program so we may as well
         // just throw them
