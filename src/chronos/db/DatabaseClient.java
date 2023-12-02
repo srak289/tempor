@@ -11,13 +11,12 @@ public class DatabaseClient {
     private Connection conn;
     private String url;
 
-    // default constuctor
-    public DatabaseClient() {
-        this.url = "jdbc:sqlite:time.db";
-    }
-
     public DatabaseClient(String url) {
-        this.url = "jdbc:sqlite:"+url;
+        if (url != null) {
+            this.url = "jdbc:sqlite:"+url;
+        } else {
+            this.url = "jdbc:sqlite:time.db";
+        }
     }
 
     /**
