@@ -29,4 +29,8 @@ INSERT INTO task_tags (task_id, tag_id) VALUES
 
 UPDATE task SET in_progress = True WHERE id = 5;
 
+UPDATE task SET in_progress = NULL WHERE id = 5;
+
+UPDATE task SET time_stopped = '2023-12-04 08:00:00' WHERE id = 5;
+
 COMMIT;
