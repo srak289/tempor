@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS task (
     time_created    TIMESTAMP,
     time_started    TIMESTAMP,
     time_worked     INTEGER
-        DEFAULT 0 NOT NULL,
+        DEFAULT 0 NOT NULL, -- in seconds
     time_stopped    TIMESTAMP,
     due_by          TIMESTAMP,
     allowed_time    INTEGER
@@ -25,9 +25,8 @@ CREATE TABLE IF NOT EXISTS tag (
 CREATE TABLE IF NOT EXISTS task_tags (
     task_id INTEGER,
     tag_id INTEGER,
-    -- should this be a cascade?
-    -- we just want this row deleted if either key is deleted
-    -- look up what CASCADE does
+    -- we cascade here because the join table row should
+    -- drop if either parent record does
     FOREIGN KEY(task_id) REFERENCES task(id)
         ON DELETE CASCADE,
     FOREIGN KEY(tag_id) REFERENCES tag(id)
@@ -43,52 +42,55 @@ CREATE TRIGGER IF NOT EXISTS trg_task_set_time_created
     END
 ;
 
--- TODO
--- triggers for time stopped?
-
-CREATE TRIGGER IF NOT EXISTS trg_task_auto_stop_task
+CREATE TRIGGER IF NOT EXISTS trg_task_set_time_stopped
     BEFORE UPDATE OF in_progress ON task
     WHEN new.in_progress IS NULL
     BEGIN
         UPDATE task
-        SET
-            time_stopped = CURRENT_TIMESTAMP
+        SET time_stopped = CURRENT_TIMESTAMP
+        WHERE id = old.id;
+    END
+;
+
+CREATE TRIGGER IF NOT EXISTS trg_task_set_time_started
+    AFTER UPDATE OF in_progress ON task
+    WHEN new.in_progress = True
+    BEGIN
+        UPDATE task
+        SET time_started = CURRENT_TIMESTAMP,
+            time_stopped = NULL
         WHERE id = old.id;
     END
 ;
 
 CREATE TRIGGER IF NOT EXISTS trg_task_calculate_time_worked
     AFTER UPDATE OF in_progress ON task
+    -- new.in_progress will be NULL when we are stopping a task
     WHEN new.in_progress IS NULL
     BEGIN
         UPDATE task
-        SET
-            time_worked = (old.time_worked + (old.time_started - old.time_stopped))
-        WHERE id = old.id;
-    END
-;
-
-CREATE TRIGGER IF NOT EXISTS trg_task_set_time_for_start
-    AFTER UPDATE OF in_progress ON task
-    WHEN new.in_progress
-    BEGIN
-        UPDATE task
-        SET
-            time_started = CURRENT_TIMESTAMP,
-            time_stopped = NULL
+        SET time_worked = (
+            SELECT time_worked + unixepoch(time_stopped) - unixepoch(time_started)
+            FROM task
+            where id = old.id
+        )
         WHERE id = old.id;
     END
 ;
 
 CREATE VIEW IF NOT EXISTS task_join_tags AS
     SELECT ta.name AS task_name, GROUP_CONCAT(tg.name) AS task_tags
-        FROM task AS ta
-        JOIN task_tags ON task_id = ta.id
-        JOIN tag AS tg ON tag_id = tg.id
-        GROUP BY ta.name
+    FROM task AS ta
+    JOIN task_tags ON task_id = ta.id
+    JOIN tag AS tg ON tag_id = tg.id
+    GROUP BY ta.name
 ;
 
---CREATE VIEW IF NOT EXISTS time_per_tag AS
---    -- TODO
---    SELECT * from task
---;
+CREATE VIEW IF NOT EXISTS time_per_tag AS
+    -- TODO
+    SELECT time_worked AS SUM(ta.time)
+    FROM task AS ta
+    JOIN task_tags ON task_id = ta.id
+    JOIN tag AS tg ON tag_id = tg.id
+    GROUP BY tg.id;
+;
