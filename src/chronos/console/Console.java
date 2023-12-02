@@ -5,6 +5,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.lang.reflect.*;
 
 import org.jboss.jreadline.console.*;
 import org.jboss.jreadline.console.settings.Settings;
@@ -50,8 +51,8 @@ public class Console implements Completion {
         // the keys of this map will be used in auto-completion
 
         // we'll use reflection to call the function referenced in this map
-        this.commands.put("help", "help");
-        this.commands.put("?", "help");
+        this.commands.put("help", "showHelp");
+        this.commands.put("?", "showHelp");
         this.commands.put("quit", null);
         this.commands.put("clear", null);
         this.commands.put("cls", null);
@@ -102,9 +103,18 @@ public class Console implements Completion {
         co.setCompletionCandidates(completions);
     }
 
+    private void showHelp(String args) {
+        System.out.println("This is the help");
+    }
+
+    private void showConnection(String args) {
+        System.out.println("The connection");
+    }
+
     public void run() throws IOException {
         ConsoleOutput line;
         String buf = "";
+        String cmd = "";
         while ((line = console.read("chronos> ")) != null) {
 
             // perhaps we'll end up with something like
@@ -126,11 +136,25 @@ public class Console implements Completion {
 
             } else if (buf.equalsIgnoreCase("clear")){
                 this.console.clear();
-            } else if (
-                buf.equalsIgnoreCase("help") ||
-                buf.equalsIgnoreCase("?")
-            ) {
-                this.console.pushToStdOut("the help\n");
+            } else {
+                try {
+                    cmd = this.commands.get(buf);
+                    if (cmd == null) {
+                        System.out.println("No commamd "+buf);
+                    } else {
+                        //System.out.println(this.getClass().getDeclaredMethod(cmd, String.class));
+                        Console.class.getDeclaredMethod(cmd, String.class).invoke(this, cmd);
+                    }
+                } catch (InvocationTargetException e) {
+                    e.printStackTrace();
+                    System.exit(1);
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                    System.exit(1);
+                } catch (NoSuchMethodException e) {
+                    e.printStackTrace();
+                    System.exit(1);
+                }
             }
         }
     }
