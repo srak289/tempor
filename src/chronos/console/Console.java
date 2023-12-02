@@ -57,32 +57,32 @@ public class Console implements Completion {
         this.commands.put("clear", "clearConsole");
         this.commands.put("cls", "clearConsole");
 
-        this.commands.put("create", null);
-        this.commands.put("delete", null);
+        this.commands.put("create", "showCreateHelp");
+        this.commands.put("delete", "showDeleteHelp");
 
-        this.commands.put("show", null);
-        this.commands.put("search", null);
-        this.commands.put("start", null);
-        this.commands.put("stop", null);
+        this.commands.put("show", "showCurrent");
+        this.commands.put("search", "showSearchHelp");
+        this.commands.put("start", "startTask");
+        this.commands.put("stop", "stopTask");
 
-        this.commands.put("create tag", null);
-        this.commands.put("create task", null);
-        this.commands.put("create help", null);
+        this.commands.put("create tag", "createTag");
+        this.commands.put("create task", "createTask");
+        this.commands.put("create help", "showCreateHelp");
 
-        this.commands.put("delete tag", null);
-        this.commands.put("delete task", null);
-        this.commands.put("delete help", null);
+        this.commands.put("delete tag", "deleteTag");
+        this.commands.put("delete task", "deleteTask");
+        this.commands.put("delete help", "showDeleteHelp");
 
-        this.commands.put("show tags", null);
-        this.commands.put("show tasks", null);
-        this.commands.put("show help", null);
+        this.commands.put("show tags", "showTags");
+        this.commands.put("show tasks", "showTasks");
+        this.commands.put("show help", "showShowHelp");
 
-        this.commands.put("search tags", null);
-        this.commands.put("search tasks", null);
-        this.commands.put("search help", null);
+        this.commands.put("search tags", "searchTags");
+        this.commands.put("search tasks", "searchTasks");
+        this.commands.put("search help", "showSearchHelp");
 
-        this.commands.put("start help", null);
-        this.commands.put("stop help", null);
+        this.commands.put("start help", "showStartHelp");
+        this.commands.put("stop help", "showStopHelp");
     }
 
     @Override
@@ -103,12 +103,96 @@ public class Console implements Completion {
         co.setCompletionCandidates(completions);
     }
 
-    private void showHelp(String args) throws IOException {
-        this.print("This is the help");
+    // begin command section
+    private void create(String args) throws IOException {
     }
 
-    private void showConnection(String args) throws IOException {
-        this.print("The connection");
+    private void showCurrent(String args) throws IOException {
+    }
+
+    // begin help section
+    private void showHelp(String args) throws IOException {
+        this.print("The chronos CLI\n"
+            .concat("\tstart <task_name>\t- start a task\n")
+            .concat("\tstop\t- stop the current task\n")
+            .concat("\tshow <task|tag> <name>\n")
+            .concat("\tcreate <task|tag> <name>\t- create a task or tag\n")
+            .concat("\tdelete <task|tag> <name>\t- delete a task or tag\n")
+            .concat("\tquit\t- quit the console\n")
+        );
+    }
+
+    private void showCreateHelp(String args) throws IOException {
+        this.print("Help for: show\n"
+            .concat("\tshow <task|tag> <name>")
+        );
+    }
+
+    private void showDeleteHelp(String args) throws IOException {
+        this.print("Help for: show\n"
+            .concat("\tshow <task|tag> <name>")
+        );
+    }
+
+    private void showShowHelp(String args) throws IOException {
+        this.print("Help for: show\n"
+            .concat("\tshow <task|tag> <name>")
+        );
+    }
+
+    private void showSearchHelp(String args) throws IOException {
+    }
+
+    private void showStartHelp(String args) throws IOException {
+        this.print("Help for: start\n"
+            .concat("\tstart <task_name>\t- start a task given by task_name\n")
+        );
+    }
+
+    private void showStopHelp(String args) throws IOException {
+        this.print("Help for: stop\n"
+            .concat("\tstop\t- stop the current task\n")
+        );
+    }
+
+    // end help section
+
+    private void startTask(String args) throws IOException {
+        // accepts a task name to start
+        // 
+    }
+
+    private void stopTask(String args) throws IOException {
+        // print "no task" if no task running
+        // else print report
+    }
+
+    private void createTag(String args) throws IOException {
+    }
+
+    private void createTask(String args) throws IOException {
+    }
+
+    private void deleteTag(String args) throws IOException {
+    }
+
+    private void deleteTask(String args) throws IOException {
+    }
+
+    private void showTags(String args) throws IOException {
+    }
+
+    private void showTasks(String args) throws IOException {
+    }
+
+    private void searchTags(String args) throws IOException {
+    }
+
+    private void searchTasks(String args) throws IOException {
+    }
+
+    private void clearConsole(String args) throws IOException {
+        this.console.clear();
     }
 
     private void quitConsole(String args) {
@@ -117,10 +201,8 @@ public class Console implements Completion {
         } catch (Exception e) {}
         System.exit(0);
     }
+    // end command section
 
-    private void clearConsole(String args) throws IOException {
-        this.console.clear();
-    }
 
     /**
      * Print to our console
@@ -145,6 +227,9 @@ public class Console implements Completion {
             this.print("DBG: Received "+buf);
 
             cmd = this.commands.get(buf);
+            // TODO we need to split the buf string to get args after the command
+            // perhaps we match on existing commands and then split
+            // before we call by reflection
             if (cmd == null) {
                 this.print("E: No such commamd "+buf);
             } else {

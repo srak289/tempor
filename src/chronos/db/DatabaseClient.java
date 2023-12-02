@@ -28,6 +28,7 @@ public class DatabaseClient {
             try {
                 Class.forName("org.sqlite.JDBC");
             } catch (ClassNotFoundException e) {
+                System.out.println("You may need the sqlite JDBC!");
                 throw new ChronosDatabaseException(e);
             }
             this.conn = DriverManager.getConnection(this.url);
@@ -80,35 +81,10 @@ public class DatabaseClient {
         }  
     }  
 
-    public void create() throws ChronosDatabaseException {
-        try {
-            Statement stmt = this.conn.createStatement();
-        } catch (SQLException e) {
-            throw new ChronosDatabaseException(e);
-        }
-    }
-
-    public void read() throws ChronosDatabaseException {
-        try {
-            Statement stmt = this.conn.createStatement();
-        } catch (SQLException e) {
-            throw new ChronosDatabaseException(e);
-        }
-    }
-
-    public void update() throws ChronosDatabaseException {
-        try {
-            Statement stmt = this.conn.createStatement();
-        } catch (SQLException e) {
-            throw new ChronosDatabaseException(e);
-        }
-    }
-
-    public void delete() throws ChronosDatabaseException {
-        try {
-            Statement stmt = this.conn.createStatement();
-        } catch (SQLException e) {
-            throw new ChronosDatabaseException(e);
-        }
-    }
+    // TODO we need an interface to query and receive things
+    // probably letting the console class make SQL calls is good enough
+    // but we need to figure out how the objects should be returned
+    //
+    // We may also want prepared statements for things like pulling reports
+    // of tasks and such
 }
