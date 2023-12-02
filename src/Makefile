@@ -14,6 +14,10 @@ JARCLASSPATH := $(subst $(SPACE),:,$(JARSOURCES))
 SRCS != find . -name \*.java
 OBJS := $(patsubst %.java,.jclass/%.class,$(SRCS))
 
+.PHONY: run
+run: build
+	java -cp ".jclass:$(JARCLASSPATH)" chronos.Main $(RUN_ARGS)
+
 .PHONY: build
 build: .jclass $(JARSOURCES) $(OBJS)
 	cp schema.sql .jclass/chronos/db/
@@ -23,10 +27,6 @@ build: .jclass $(JARSOURCES) $(OBJS)
 
 .jclass/%.class: %.java
 	javac -cp ".:$(JARCLASSPATH)" -g -d .jclass $<
-
-.PHONY: run
-run: build
-	java -cp ".jclass:$(JARCLASSPATH)" chronos.Main $(RUN_ARGS)
 
 .PHONY: debug
 debug: build

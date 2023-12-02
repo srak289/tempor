@@ -9,13 +9,15 @@ import java.util.ArrayList;
 
 public class DatabaseClient {
     private Connection conn;
-    private static String url = "jdbc:sqlite:time.db";
+    private String url;
 
     // default constuctor
-    public DatabaseClient() {}
+    public DatabaseClient() {
+        this.url = "jdbc:sqlite:time.db";
+    }
 
     public DatabaseClient(String url) {
-        this.url = url;
+        this.url = "jdbc:sqlite:"+url;
     }
 
     /**
