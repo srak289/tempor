@@ -60,7 +60,7 @@ public class DatabaseClient {
                     ) {
                         // System.out.println("Skipping empty or commented line");
                         continue;
-                    } else if (line.endsWith(";")) {
+                    } else if (line.equals(";\n")) {
                         sql += line+"\n";
                         // System.out.println("Adding batch statement\n"+sql);
                         stmt.addBatch(sql);
