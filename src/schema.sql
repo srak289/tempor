@@ -3,15 +3,16 @@ CREATE TABLE IF NOT EXISTS task (
         PRIMARY KEY,
     name            VARCHAR(64)
         UNIQUE NOT NULL,
-    -- "in_progress" MUST be NULL or True
-    -- because only one task may be "in_progress"
-    -- at a single time
+-- "in_progress" MUST be NULL or True
+-- because only one task may be "in_progress"
+-- at a single time
     in_progress     BOOLEAN
         DEFAULT NULL UNIQUE CHECK (in_progress),
     time_created    TIMESTAMP,
     time_started    TIMESTAMP,
+-- time_worked in seconds
     time_worked     INTEGER
-        DEFAULT 0 NOT NULL, -- in seconds
+        DEFAULT 0 NOT NULL,
     time_stopped    TIMESTAMP,
     due_by          TIMESTAMP,
     allowed_time    INTEGER
@@ -30,8 +31,8 @@ CREATE TABLE IF NOT EXISTS task_tags (
         NOT NULL,
     tag_id INTEGER
         NOT NULL,
-    -- we cascade here because the join table row should
-    -- drop if either parent record does
+-- we cascade here because the join table row should
+-- drop if either parent record does
     FOREIGN KEY(task_id) REFERENCES task(id)
         ON DELETE CASCADE,
     FOREIGN KEY(tag_id) REFERENCES tag(id)
@@ -60,9 +61,9 @@ CREATE TRIGGER IF NOT EXISTS trg_task_set_time_started
 ;
 
 CREATE TRIGGER IF NOT EXISTS trg_task_set_time_stopped
-    -- we need to set the stop time before the 
-    -- calculate trigger fires so this must 
-    -- be BEFORE UPDATE
+-- we need to set the stop time before the 
+-- calculate trigger fires so this must 
+-- be BEFORE UPDATE
     BEFORE UPDATE OF in_progress ON task
     WHEN new.in_progress IS NULL
     BEGIN
@@ -73,15 +74,15 @@ CREATE TRIGGER IF NOT EXISTS trg_task_set_time_stopped
 ;
 
 CREATE TRIGGER trg_task_calculate_time_worked
-    -- when time_stopped has been set we
-    -- should recalculate the time_worked column
+-- when time_stopped has been set we
+-- should recalculate the time_worked column
     AFTER UPDATE OF time_stopped ON task
     WHEN new.time_stopped IS NOT NULL
     BEGIN
         UPDATE task
         SET time_worked = (
-            -- we use unixepoch() to get the seconds
-            -- back from the TIMESTAMP
+-- we use unixepoch() to get the seconds
+-- back from the TIMESTAMP
             SELECT time_worked + unixepoch(time_stopped) - unixepoch(time_started)
             FROM task
             WHERE id = new.id
@@ -109,10 +110,10 @@ CREATE VIEW IF NOT EXISTS vw_tasks_by_tag AS
 ;
 
 CREATE VIEW IF NOT EXISTS vw_time_per_tag AS
-    -- divide by 3600 to get hours back
+-- divide by 3600 to get hours back
     SELECT tg.name AS tag_name, ROUND(TOTAL(ta.time_worked)/3600, 2) AS hours_worked
     FROM task AS ta
     JOIN task_tags ON task_id = ta.id
     JOIN tag AS tg ON tag_id = tg.id
-    GROUP BY tg.id;
+    GROUP BY tg.id
 ;
