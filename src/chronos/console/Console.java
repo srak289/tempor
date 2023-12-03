@@ -72,11 +72,8 @@ public class Console implements Completion {
 
         // we'll use reflection to call the function referenced in this map
         this.commands.put("help", "showHelp");
-        this.commands.put("h", "showHelp");
         this.commands.put("quit", "quitConsole");
-        this.commands.put("q", "quitConsole");
         this.commands.put("clear", "clearConsole");
-        this.commands.put("cl", "clearConsole");
 
         this.commands.put("create", "showHelp");
         this.commands.put("delete", "showHelp");
@@ -122,11 +119,6 @@ public class Console implements Completion {
                         .concat("\tquit\t- quit the console\n")
                     );
                     break;
-                case "search":
-                    this.info("Help for: search\n"
-                        .concat("\tsearch <task|tag> <name>")
-                    );
-                    break;
                 case "start":
                     this.info("Help for: start\n"
                         .concat("\tstart <task_name> - start a task matching <task_name>")
@@ -137,34 +129,50 @@ public class Console implements Completion {
                         .concat("\tstop\t - stops the current running task")
                     );
                     break;
+                case "create":
+                    this.info("Help for: create\n"
+                        .concat("\tcreate <task|tag> <name>")
+                    );
+                    break;
+                case "delete":
+                    this.info("Help for: delete\n"
+                        .concat("\tdelete <task|tag> <name>")
+                    );
+                    break;
                 case "show":
                     this.info("Help for: show\n"
                         .concat("\tshow <task|tag> <name>")
                     );
                     break;
-                case "create":
-                    break;
-                case "delete":
-                    break;
-                case "show":
-                    break;
-                case "search":
-                    break;
                 case "create tag":
+                    this.info("Help for: create tag\n"
+                        .concat("\tcreate tag <name>")
+                    );
                     break;
                 case "create task":
+                    this.info("Help for: create task\n"
+                        .concat("\tcreate task <name>")
+                    );
                     break;
                 case "delete tag":
+                    this.info("Help for: delete tag\n"
+                        .concat("\tdelete tag <name>")
+                    );
                     break;
                 case "delete task":
+                    this.info("Help for: delete task\n"
+                        .concat("\tdelete task <name>")
+                    );
                     break;
                 case "show tag":
+                    this.info("Help for: show tag\n"
+                        .concat("\tshow tag <name>")
+                    );
                     break;
                 case "show task":
-                    break;
-                case "search tag":
-                    break;
-                case "search task":
+                    this.info("Help for: show task\n"
+                        .concat("\tshow task <name>")
+                    );
                     break;
                 default:
                     this.error("No help for \""+cmd+"\"");
@@ -220,12 +228,6 @@ public class Console implements Completion {
     }
 
     private void showTasks(String[] args) throws IOException {
-    }
-
-    private void searchTags(String[] args) throws IOException {
-    }
-
-    private void searchTasks(String[] args) throws IOException {
     }
 
     private void clearConsole(String[] args) throws IOException {
