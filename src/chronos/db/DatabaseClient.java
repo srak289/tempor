@@ -55,6 +55,8 @@ public class DatabaseClient {
             ) {
                 // System.out.println("Skipping empty or commented line");
                 continue;
+            // We split our batches on lines that contain a single ';'
+            // in order to avoid errors defining triggers
             } else if (line.equals(";\n")) {
                 sql += line+"\n";
                 // System.out.println("Adding batch statement\n"+sql);

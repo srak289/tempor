@@ -104,14 +104,8 @@ public class Console implements Completion {
     }
 
     // begin command section
-    private void create(String args) throws IOException {
-    }
-
-    private void showCurrent(String args) throws IOException {
-    }
-
     // begin help section
-    private void showHelp(String args) throws IOException {
+    private void showHelp(String[] args) throws IOException {
         this.print("The chronos CLI\n"
             .concat("\tstart <task_name>\t- start a task\n")
             .concat("\tstop\t- stop the current task\n")
@@ -122,34 +116,34 @@ public class Console implements Completion {
         );
     }
 
-    private void showCreateHelp(String args) throws IOException {
+    private void showCreateHelp(String[] args) throws IOException {
         this.print("Help for: show\n"
             .concat("\tshow <task|tag> <name>")
         );
     }
 
-    private void showDeleteHelp(String args) throws IOException {
+    private void showDeleteHelp(String[] args) throws IOException {
         this.print("Help for: show\n"
             .concat("\tshow <task|tag> <name>")
         );
     }
 
-    private void showShowHelp(String args) throws IOException {
+    private void showShowHelp(String[] args) throws IOException {
         this.print("Help for: show\n"
             .concat("\tshow <task|tag> <name>")
         );
     }
 
-    private void showSearchHelp(String args) throws IOException {
+    private void showSearchHelp(String[] args) throws IOException {
     }
 
-    private void showStartHelp(String args) throws IOException {
+    private void showStartHelp(String[] args) throws IOException {
         this.print("Help for: start\n"
             .concat("\tstart <task_name>\t- start a task given by task_name\n")
         );
     }
 
-    private void showStopHelp(String args) throws IOException {
+    private void showStopHelp(String[] args) throws IOException {
         this.print("Help for: stop\n"
             .concat("\tstop\t- stop the current task\n")
         );
@@ -157,45 +151,62 @@ public class Console implements Completion {
 
     // end help section
 
-    private void startTask(String args) throws IOException {
+    private void create(String[] args) throws IOException {
+        this.print("Got args "+args);
+    }
+
+    private void showCurrent(String[] args) throws IOException {
+        this.print("Got args "+args);
+    }
+
+    private void startTask(String[] args) throws IOException {
         // accepts a task name to start
         // 
     }
 
-    private void stopTask(String args) throws IOException {
+    private void stopTask(String[] args) throws IOException {
         // print "no task" if no task running
         // else print report
     }
 
-    private void createTag(String args) throws IOException {
+    private void createTag(String[] args) throws IOException {
+        this.print("Got args "+args);
     }
 
-    private void createTask(String args) throws IOException {
+    private void createTask(String[] args) throws IOException {
+        this.print("Got args "+args);
     }
 
-    private void deleteTag(String args) throws IOException {
+    private void deleteTag(String[] args) throws IOException {
+        this.print("Got args "+args);
     }
 
-    private void deleteTask(String args) throws IOException {
+    private void deleteTask(String[] args) throws IOException {
+        this.print("Got args "+args);
     }
 
-    private void showTags(String args) throws IOException {
+    private void showTags(String[] args) throws IOException {
+        this.print("Got args "+args);
     }
 
-    private void showTasks(String args) throws IOException {
+    private void showTasks(String[] args) throws IOException {
+        this.print("Got args "+args);
     }
 
-    private void searchTags(String args) throws IOException {
+    private void searchTags(String[] args) throws IOException {
+        this.print("Got args "+args);
     }
 
-    private void searchTasks(String args) throws IOException {
+    private void searchTasks(String[] args) throws IOException {
+        this.print("Got args "+args);
     }
 
-    private void clearConsole(String args) throws IOException {
+    private void clearConsole(String[] args) throws IOException {
         this.console.clear();
     }
 
-    private void quitConsole(String args) {
+    private void quitConsole(String[] args) throws IOException {
+        this.print("Bye!");
         try {
             this.console.stop();
         } catch (Exception e) {}
@@ -203,9 +214,26 @@ public class Console implements Completion {
     }
     // end command section
 
+    /**
+     * Return a new String[] of String[] s
+     * from index 'start' to 'end' exclusive
+     */
+    private String[] getSlice(String[] s, int start, int end) throws IOException {
+        //this.print("Computing slice for "+String.join(" ", s)+" with start: "+start+" end: "+end);
+        if (end - start <= 0) {
+            return null;
+        }
+        String[] res = new String[end-start];
+        //this.print("DBG: target length "+res.length);
+        for (int i = 0; i < res.length; i++) {
+            //this.print("DBG: Adding \""+s[i+start]+"\" to resulting slice");
+            res[i] = s[i+start];
+        }
+        return res;
+    }
 
     /**
-     * Print to our console
+     * Convenience funciton to print to this.console
      */
     private void print(String line) throws IOException {
         this.console.pushToStdOut(line+"\n");
@@ -215,30 +243,77 @@ public class Console implements Completion {
         IOException,
         InvocationTargetException,
         IllegalAccessException,
+        IllegalArgumentException,
         NoSuchMethodException
     {
         ConsoleOutput line;
         String buf = "";
         String cmd = "";
+
+        String[] scmd = null;
+        String[] args = null;
+
         while ((line = console.read("chronos> ")) != null) {
+            // reset variables
+            buf = "";
+            cmd = "";
+            scmd = null;
+            args = null;
 
             buf = line.getBuffer().trim();
-            // for debugging
-            this.print("DBG: Received "+buf);
+            //this.print("DBG: Received "+buf);
 
-            cmd = this.commands.get(buf);
-            // TODO we need to split the buf string to get args after the command
-            // perhaps we match on existing commands and then split
-            // before we call by reflection
-            if (cmd == null) {
-                this.print("E: No such commamd "+buf);
-            } else {
-                // we use reflection to call the method specified in the command hashmap
-                //System.out.println(this.getClass().getDeclaredMethod(cmd, String.class));
-                this.getClass()
-                    .getDeclaredMethod(cmd, String.class)
-                    .invoke(this, cmd);
+            // short-circuit if empty buffer
+            if (buf.equals("")) {
+                this.print("E: Please type a command");
+                continue;
             }
+
+            // we need to split the cmd on spaces
+            // to determine the base command to call
+            scmd = buf.split(" ");
+            args = null;
+
+            // we parse the args here for the base command
+            // and the arguments to pass
+
+            // we should decrement the join each loop to find the base command e.g.
+            // 'create tag some thing date-string-here'
+            // 'create tag some thing'
+            // 'create tag some'
+            // 'create tag' -> MATCH break loop and return ending slice
+
+            //this.print("DBG: scmd is "+String.join(" ", scmd));
+            for (int i = scmd.length; i >= 0; i--) {
+                cmd = String.join(" ", this.getSlice(scmd, 0, i));
+
+                this.print("DBG: Got slice \""+cmd+"\"");
+                cmd = this.commands.get(cmd);
+
+                if (cmd != null) {
+                    //this.print("DBG: Found method to call "+cmd);
+
+                    // for single commands we do not compute args
+                    if (scmd.length <= 1) {
+                        break;
+                    }
+
+                    // set the args to return here
+                    args = getSlice(scmd, i, scmd.length);
+                    //this.print("DBG: args is "+String.join(" ", args));
+                    break;
+                }
+            }
+
+            if (cmd == null) {
+                this.print("E: No such command \""+buf+"\"");
+                continue;
+            }
+
+            // we use reflection to call the method specified in the command hashmap
+            this.getClass()
+                .getDeclaredMethod(cmd, String[].class)
+                .invoke(this, new Object[] {args});
         }
     }
 }
