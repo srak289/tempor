@@ -73,7 +73,7 @@ CREATE TRIGGER IF NOT EXISTS trg_task_set_time_stopped
     END
 ;
 
-CREATE TRIGGER trg_task_calculate_time_worked
+CREATE TRIGGER IF NOT EXISTS trg_task_calculate_time_worked
 -- when time_stopped has been set we
 -- should recalculate the time_worked column
     AFTER UPDATE OF time_stopped ON task

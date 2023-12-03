@@ -31,7 +31,10 @@ public class Main {
             // like HashMap would
             //
             // if the client gets `null` it will use the default path (./time.db)
-            DatabaseClient db = new DatabaseClient(parsed_args.get("dbpath"));
+            DatabaseClient db = new DatabaseClient(
+                parsed_args.get("dbpath"),
+                parsed_args.get("debug")
+            );
             db.connect();
             db.setupTables();
 

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.lang.reflect.*;
+import java.sql.SQLException;
 
 import org.jboss.jreadline.console.*;
 import org.jboss.jreadline.console.settings.Settings;
@@ -104,73 +105,73 @@ public class Console implements Completion {
 
             switch (cmd) {
                 case "help":
-                    this.info("Help for: help\n"
+                    this.print("Help for: help\n"
                         .concat("\thelp\t- show general help\n")
                         .concat("\thelp <cmd>\t- show help for <cmd>\n")
                     );
                     break;
                 case "clear":
-                    this.info("Help for: clear\n"
+                    this.print("Help for: clear\n"
                         .concat("\tclear\t- clear the screen\n")
                     );
                     break;
                 case "quit":
-                    this.info("Help for: quit\n"
+                    this.print("Help for: quit\n"
                         .concat("\tquit\t- quit the console\n")
                     );
                     break;
                 case "start":
-                    this.info("Help for: start\n"
+                    this.print("Help for: start\n"
                         .concat("\tstart <task_name> - start a task matching <task_name>")
                     );
                     break;
                 case "stop":
-                    this.info("Help for: stop\n"
+                    this.print("Help for: stop\n"
                         .concat("\tstop\t - stops the current running task")
                     );
                     break;
                 case "create":
-                    this.info("Help for: create\n"
+                    this.print("Help for: create\n"
                         .concat("\tcreate <task|tag> <name>")
                     );
                     break;
                 case "delete":
-                    this.info("Help for: delete\n"
+                    this.print("Help for: delete\n"
                         .concat("\tdelete <task|tag> <name>")
                     );
                     break;
                 case "show":
-                    this.info("Help for: show\n"
+                    this.print("Help for: show\n"
                         .concat("\tshow <task|tag> <name>")
                     );
                     break;
                 case "create tag":
-                    this.info("Help for: create tag\n"
+                    this.print("Help for: create tag\n"
                         .concat("\tcreate tag <name>")
                     );
                     break;
                 case "create task":
-                    this.info("Help for: create task\n"
+                    this.print("Help for: create task\n"
                         .concat("\tcreate task <name>")
                     );
                     break;
                 case "delete tag":
-                    this.info("Help for: delete tag\n"
+                    this.print("Help for: delete tag\n"
                         .concat("\tdelete tag <name>")
                     );
                     break;
                 case "delete task":
-                    this.info("Help for: delete task\n"
+                    this.print("Help for: delete task\n"
                         .concat("\tdelete task <name>")
                     );
                     break;
                 case "show tag":
-                    this.info("Help for: show tag\n"
+                    this.print("Help for: show tag\n"
                         .concat("\tshow tag <name>")
                     );
                     break;
                 case "show task":
-                    this.info("Help for: show task\n"
+                    this.print("Help for: show task\n"
                         .concat("\tshow task <name>")
                     );
                     break;
@@ -182,10 +183,10 @@ public class Console implements Completion {
             return;
         }
 
-        this.info("General Help\n\nchronos>\n"
+        this.print("General Help\n\nchronos>\n"
             .concat("\tstart <task_name>\t\t- start a task\n")
             .concat("\tstop\t\t\t\t- stop the current task\n")
-            .concat("\tshow <task|tag> <name>\n")
+            .concat("\tshow <task|tag> [name]\t- show all or one of tag or task\n")
             .concat("\tcreate <task|tag> <name>\t- create a task or tag\n")
             .concat("\tdelete <task|tag> <name>\t- delete a task or tag\n")
             .concat("\tquit\t\t\t\t- quit the console\n")
@@ -193,17 +194,19 @@ public class Console implements Completion {
         );
     }
 
-    private void showCurrent(String[] args) throws IOException {
-        this.debug("Got args \""+String.join(" ", args)+"\"");
-    }
-
     private void startTask(String[] args) throws IOException {
         this.debug("Start task");
         if (args.length == 0) {
             this.error("'start' requires <name>");
         }
-        // accepts a task name to start
-        // 
+        this.debug("Args is "+String.join(" ", args));
+        try {
+            this.debug("Calling db.startTask with "+args[0]);
+            int result = this.db.startTask(args[0]);
+            this.debug("Result from startTask "+result);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     private void stopTask(String[] args) throws IOException {
@@ -216,6 +219,7 @@ public class Console implements Completion {
     }
 
     private void createTask(String[] args) throws IOException {
+        //public int createTask(String name, Date dueBy, int allowedTime) throws SQLException {
     }
 
     private void deleteTag(String[] args) throws IOException {
@@ -235,7 +239,7 @@ public class Console implements Completion {
     }
 
     private void quitConsole(String[] args) throws IOException {
-        this.info("Bye!");
+        this.print("Bye!");
         try {
             this.console.stop();
         } catch (Exception e) {}
@@ -262,17 +266,24 @@ public class Console implements Completion {
     }
 
     /**
+     * Print messages to this.console
+     */
+    private void print(String line) throws IOException {
+        this.console.pushToStdOut("\n"+line+"\n\n");
+    }
+
+    /**
      * Print info messages to this.console
      */
     private void info(String line) throws IOException {
-        this.console.pushToStdOut("\nINFO: "+line+"\n\n");
+        this.console.pushToStdOut("\n<chronos.console.Console: INFO>: "+line+"\n\n");
     }
 
     /**
      * Print error messages to this.console
      */
     private void error(String line) throws IOException {
-        this.console.pushToStdOut("\nERROR: "+line+"\n\n");
+        this.console.pushToStdOut("\n<chronos.console.Console: ERROR>: "+line+"\n\n");
     }
 
     /**
@@ -281,7 +292,7 @@ public class Console implements Completion {
      */
     private void debug(String line) throws IOException {
         if (this.debug) {
-            this.console.pushToStdOut("DEBUG: "+line+"\n");
+            this.console.pushToStdOut("<chronos.console.Console: DEBUG>: "+line+"\n");
         }
     }
 
