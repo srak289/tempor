@@ -1,7 +1,5 @@
 package chronos.db;
 
-import chronos.exceptions.ChronosDatabaseException;
-
 import java.io.*;
 import java.sql.*;
 import java.util.ArrayList;
@@ -23,62 +21,53 @@ public class DatabaseClient {
      * Connect to the database
      * Use the default file location if none given
      */
-    public void connect() throws ChronosDatabaseException {
+    public void connect() throws SQLException {
         try {
-            try {
-                Class.forName("org.sqlite.JDBC");
-            } catch (ClassNotFoundException e) {
-                System.out.println("You may need the sqlite JDBC!");
-                throw new ChronosDatabaseException(e);
-            }
-            this.conn = DriverManager.getConnection(this.url);
-        } catch(SQLException e) {
-            throw new ChronosDatabaseException(e);
+            Class.forName("org.sqlite.JDBC");
+        } catch (ClassNotFoundException e) {
+            System.out.println("You may need the sqlite JDBC!");
+            System.exit(255);
         }
+        this.conn = DriverManager.getConnection(this.url);
     }
 
     /**
      * Initialize the database for our app
      */
-    public void setupTables() throws ChronosDatabaseException {
+    public void setupTables() throws
+        IOException,
+        SQLException
+    {
 
-        try {  
-            Statement stmt = this.conn.createStatement();
+        Statement stmt = this.conn.createStatement();
 
-            try {
-                BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(
-                        this.getClass().getResourceAsStream("schema.sql")
-                    )
-                );
-                String line, sql = "";
-                // read table statements from schema.sql and batch them
-                while ((line = reader.readLine()) != null) {
-                    if (
-                        line.startsWith("--") ||
-                        line.isEmpty()
-                    ) {
-                        // System.out.println("Skipping empty or commented line");
-                        continue;
-                    } else if (line.equals(";\n")) {
-                        sql += line+"\n";
-                        // System.out.println("Adding batch statement\n"+sql);
-                        stmt.addBatch(sql);
-                        sql = "";
-                    } else {
-                        // System.out.println("Concat line\n"+line);
-                        sql += line+"\n";
-                    }
-                }
-            } catch (IOException e) {
-                throw new ChronosDatabaseException(e);
+        BufferedReader reader = new BufferedReader(
+            new InputStreamReader(
+                this.getClass().getResourceAsStream("schema.sql")
+            )
+        );
+        String line, sql = "";
+        // read table statements from schema.sql and batch them
+        while ((line = reader.readLine()) != null) {
+            if (
+                line.startsWith("--") ||
+                line.isEmpty()
+            ) {
+                // System.out.println("Skipping empty or commented line");
+                continue;
+            } else if (line.equals(";\n")) {
+                sql += line+"\n";
+                // System.out.println("Adding batch statement\n"+sql);
+                stmt.addBatch(sql);
+                sql = "";
+            } else {
+                // System.out.println("Concat line\n"+line);
+                sql += line+"\n";
             }
+        }
 
-            // System.out.println("Execute batch");
-            stmt.executeBatch();
-        } catch (SQLException e) {  
-            throw new ChronosDatabaseException(e);
-        }  
+        // System.out.println("Execute batch");
+        stmt.executeBatch();
     }  
 
     // TODO we need an interface to query and receive things
@@ -87,4 +76,23 @@ public class DatabaseClient {
     //
     // We may also want prepared statements for things like pulling reports
     // of tasks and such
+
+    public ResultSet exec(String query) throws SQLException {
+        Statement stmt = this.conn.createStatement(
+            ResultSet.TYPE_SCROLL_INSENSITIVE,
+            ResultSet.CONCUR_UPDATABLE
+        );
+        return stmt.executeQuery("select * from task");
+    }
+
+    /**
+     * Returns null when query is UPDATE or INSERT
+     */
+    public ResultSet execQuery(String query) throws SQLException {
+        Statement stmt = this.conn.createStatement(
+            ResultSet.TYPE_SCROLL_INSENSITIVE,
+            ResultSet.CONCUR_UPDATABLE
+        );
+        return stmt.executeQuery("select * from task");
+    }
 }

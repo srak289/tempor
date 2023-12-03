@@ -1,11 +1,11 @@
 package chronos;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.lang.reflect.*;
 
 import chronos.console.Console;
 import chronos.db.*;
-import chronos.exceptions.*;
 
 import net.sourceforge.argparse4j.*;
 import net.sourceforge.argparse4j.inf.*;
@@ -15,7 +15,7 @@ public class Main {
 
     public static void main(String[] args) throws
         IOException,
-        ChronosDatabaseException,
+        SQLException,
         ArgumentParserException,
         InvocationTargetException,
         IllegalAccessException,
