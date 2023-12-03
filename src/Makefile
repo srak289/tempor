@@ -14,6 +14,10 @@ JARCLASSPATH := $(subst $(SPACE),:,$(JARSOURCES))
 SRCS != find . -name \*.java
 OBJS := $(patsubst %.java,.jclass/%.class,$(SRCS))
 
+.PHONY:
+rundebug: build
+	$(MAKE) -- run --debug
+
 .PHONY: run
 run: build
 	java -cp ".jclass:$(JARCLASSPATH)" chronos.Main $(RUN_ARGS)

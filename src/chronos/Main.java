@@ -9,6 +9,7 @@ import chronos.db.*;
 
 import net.sourceforge.argparse4j.*;
 import net.sourceforge.argparse4j.inf.*;
+import net.sourceforge.argparse4j.impl.Arguments;
 
 
 public class Main {
@@ -19,8 +20,11 @@ public class Main {
             ArgumentParser ap = ArgumentParsers.newFor("chronos").build();
             Namespace parsed_args = null;
             ap.addArgument("--dbpath");
+            ap.addArgument("--debug").action(Arguments.storeTrue());
             parsed_args = ap.parseArgs(args);
-            // System.out.println("Parsed args \""+parsed_args+"\"");
+            if (parsed_args.get("debug")) {
+                System.out.println("Parsed args \""+parsed_args+"\"");
+            }
 
             // argparse guarantees we won't get an empty argument if the `--dbpath`
             // flag is specified; and if it wasn't will give us `null` when we `get("dbpath")
@@ -31,26 +35,12 @@ public class Main {
             db.connect();
             db.setupTables();
 
-            Console console = new Console(db);
+            Console console = new Console(db, parsed_args.get("debug"));
             console.run();
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } catch (ArgumentParserException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
+            System.exit(1);
         }
-        // } finally {
-        //     System.exit(1);
-        // }
     }
 }
