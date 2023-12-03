@@ -1,11 +1,11 @@
-package chronos;
+package tempor;
 
 import java.io.IOException;
 import java.sql.SQLException;
 import java.lang.reflect.*;
 
-import chronos.Console;
-import chronos.DatabaseClient;
+import tempor.Console;
+import tempor.DatabaseClient;
 
 import net.sourceforge.argparse4j.*;
 import net.sourceforge.argparse4j.inf.*;
@@ -17,7 +17,7 @@ public class Main {
     public static void main(String[] args) {
         try {
 
-            ArgumentParser ap = ArgumentParsers.newFor("chronos").build();
+            ArgumentParser ap = ArgumentParsers.newFor("tempor").build();
             Namespace parsed_args = null;
             ap.addArgument("--dbpath");
             ap.addArgument("--debug").action(Arguments.storeTrue());

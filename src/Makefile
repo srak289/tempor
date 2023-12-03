@@ -20,11 +20,11 @@ rundebug: build
 
 .PHONY: run
 run: build
-	java -cp ".jclass:$(JARCLASSPATH)" chronos.Main $(RUN_ARGS)
+	java -cp ".jclass:$(JARCLASSPATH)" tempor.Main $(RUN_ARGS)
 
 .PHONY: build
 build: .jclass $(JARSOURCES) $(OBJS)
-	cp schema.sql .jclass/chronos/
+	cp schema.sql .jclass/tempor/
 
 .jclass:
 	mkdir .jclass
@@ -34,30 +34,30 @@ build: .jclass $(JARSOURCES) $(OBJS)
 
 .PHONY: debug
 debug: build
-	jdb -sourcepath "." -classpath ".jclass:$(JARCLASSPATH)" chronos.Main $(RUN_ARGS)
+	jdb -sourcepath "." -classpath ".jclass:$(JARCLASSPATH)" tempor.Main $(RUN_ARGS)
 
 .PHONY: clean
 clean:
-	rm -rf .jclass chronos.jar
+	rm -rf .jclass tempor.jar
 
 .PHONY: rebuild
 rebuild: clean build
 
 .PHONY: runjar
-runjar: chronos.jar
-	java -jar chronos.jar $(RUN_ARGS)
+runjar: tempor.jar
+	java -jar tempor.jar $(RUN_ARGS)
 
 .PHONY: jar
-jar: chronos.jar
+jar: tempor.jar
 
-chronos.jar: build
+tempor.jar: build
 	mkdir jarbuild
 	cp -r .jar/* jarbuild
 	for J in $(JARS); do (cd jarbuild && jar xf $$J); done
 	(cd jarbuild && rm *.jar)
 	cp -r .jclass/* jarbuild
 	cp MANIFEST.MF jarbuild
-	jar cfm chronos.jar MANIFEST.MF -C jarbuild chronos -C jarbuild org -C jarbuild net
+	jar cfm tempor.jar MANIFEST.MF -C jarbuild tempor -C jarbuild org -C jarbuild net
 	rm -rf jarbuild
 
 .PHONY: sources

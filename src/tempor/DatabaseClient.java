@@ -1,4 +1,4 @@
-package chronos;
+package tempor;
 
 import java.io.*;
 import java.sql.*;
@@ -37,7 +37,7 @@ public class DatabaseClient {
      */
     private void error(String line) {
         if (this.debug) {
-            System.out.println("<chronos.DatabaseClient: ERROR>: "+line);
+            System.out.println("<tempor.DatabaseClient: ERROR>: "+line);
         }
     }
 
@@ -46,7 +46,7 @@ public class DatabaseClient {
      */
     private void debug(String line) {
         if (this.debug) {
-            System.out.println("<chronos.DatabaseClient: DEBUG>: "+line);
+            System.out.println("<tempor.DatabaseClient: DEBUG>: "+line);
         }
     }
 

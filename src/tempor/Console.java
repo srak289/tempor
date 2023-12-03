@@ -1,4 +1,4 @@
-package chronos;
+package tempor;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -16,7 +16,7 @@ import org.jboss.jreadline.console.settings.Settings;
 import org.jboss.jreadline.complete.*;
 import org.jboss.jreadline.edit.actions.Operation;
 
-import chronos.DatabaseClient;
+import tempor.DatabaseClient;
 
 
 public class Console implements Completion {
@@ -182,7 +182,7 @@ public class Console implements Completion {
             return;
         }
 
-        this.print("General Help\n\nchronos>\n"
+        this.print("General Help\n\ntempor>\n"
             .concat("\tstart <task_name>\t\t- start a task\n")
             .concat("\tstop\t\t\t\t- stop the current task\n")
             .concat("\tshow <task|tag> [name]\t- show all or one of tag or task\n")
@@ -316,14 +316,14 @@ public class Console implements Completion {
      * Print info messages to this.console
      */
     private void info(String line) throws IOException {
-        this.console.pushToStdOut("\n<chronos.Console: INFO>: "+line+"\n\n");
+        this.console.pushToStdOut("\n<tempor.Console: INFO>: "+line+"\n\n");
     }
 
     /**
      * Print error messages to this.console
      */
     private void error(String line) throws IOException {
-        this.console.pushToStdOut("\n<chronos.Console: ERROR>: "+line+"\n\n");
+        this.console.pushToStdOut("\n<tempor.Console: ERROR>: "+line+"\n\n");
     }
 
     /**
@@ -332,7 +332,7 @@ public class Console implements Completion {
      */
     private void debug(String line) throws IOException {
         if (this.debug) {
-            this.console.pushToStdOut("<chronos.Console: DEBUG>: "+line+"\n");
+            this.console.pushToStdOut("<tempor.Console: DEBUG>: "+line+"\n");
         }
     }
 
@@ -354,7 +354,7 @@ public class Console implements Completion {
         String[] args = null;
 
         // main loop
-        while ((line = console.read("chronos> ")) != null) {
+        while ((line = console.read("tempor> ")) != null) {
             // reset variables
             buf = "";
             cmd = "";
