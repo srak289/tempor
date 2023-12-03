@@ -1,8 +1,7 @@
-package chronos.db;
+package chronos;
 
 import java.io.*;
 import java.sql.*;
-import java.util.ArrayList;
 
 
 public class DatabaseClient {
@@ -38,15 +37,16 @@ public class DatabaseClient {
      */
     private void error(String line) {
         if (this.debug) {
-            System.out.println("<chronos.db.DatabaseClient: ERROR>: "+line);
+            System.out.println("<chronos.DatabaseClient: ERROR>: "+line);
         }
     }
+
     /**
      * Print debug message if this.debug
      */
     private void debug(String line) {
         if (this.debug) {
-            System.out.println("<chronos.db.DatabaseClient: DEBUG>: "+line);
+            System.out.println("<chronos.DatabaseClient: DEBUG>: "+line);
         }
     }
 
@@ -106,16 +106,18 @@ public class DatabaseClient {
 
         this.debug("Execute batch");
         stmt.executeBatch();
+
+        // prepare our statements after the database is initialized
         this.prepareStatements();
     }  
 
-
+    // use prepared statements to avoid SQL issues
     private void prepareStatements() throws SQLException {
         this.psCreateTask = this.conn.prepareStatement(
             "INSERT INTO task (name, due_by, allowed_time) VALUES (?, ?, ?)"
         );
         this.psSearchTask = this.conn.prepareStatement(
-            "SELECT * FROM task WHERE name = '?'"
+            "SELECT * FROM task WHERE name = ?"
         );
         this.psStartTask = this.conn.prepareStatement(
             "UPDATE task SET in_progress = True WHERE name = ?"
@@ -127,25 +129,18 @@ public class DatabaseClient {
             "SELECT * FROM task WHERE in_progress = True"
         );
         this.psDeleteTask = this.conn.prepareStatement(
-            "DELETE FROM task WHERE name = '?'"
+            "DELETE FROM task WHERE name = ?"
         );
         this.psCreateTag = this.conn.prepareStatement(
             "INSERT INTO tag (name) VALUES (?)"
         );
         this.psSearchTag = this.conn.prepareStatement(
-            "SELECT * FROM tag WHERE name = '?'"
+            "SELECT * FROM tag WHERE name = ?"
         );
         this.psDeleteTag = this.conn.prepareStatement(
-            "DELETE FROM tag WHERE name = '?'"
+            "DELETE FROM tag WHERE name = ?"
         );
     }
-
-    // TODO we need an interface to query and receive things
-    // probably letting the console class make SQL calls is good enough
-    // but we need to figure out how the objects should be returned
-    //
-    // We may also want prepared statements for things like pulling reports
-    // of tasks and such
 
     public int createTask(String name, Date dueBy, int allowedTime) throws SQLException {
         this.psCreateTask.setString(1, name);
@@ -169,19 +164,15 @@ public class DatabaseClient {
     }
 
     public int startTask(String name) throws SQLException {
-        this.debug("Execute startTask");
+        this.debug("Execute startTask with name = "+name);
         this.psStartTask.setString(1, name);
-        this.debug("After setString");
         return this.psStartTask.executeUpdate();
     }
 
     public int stopTask() throws SQLException {
-        ResultSet rs = this.conn.createStatement()
-            .executeQuery("SELECT * FROM task WHERE in_progress = True");
-        // if rs == null or zero len we return problem
-        // else we update the task
-        // TODO
-        return 1;
+        // might be nice to run a query and return name
+        // of the task we stopped
+        return this.psStopTask.executeUpdate();
     }
 
     public int deleteTask(String name) throws SQLException {
@@ -194,12 +185,12 @@ public class DatabaseClient {
         return this.psCreateTag.executeUpdate();
     }
 
-    public ResultSet searchTag(String name) throws SQLException {
+    public ResultSet searchTags(String name) throws SQLException {
         this.psSearchTag.setString(1, name);
         return this.psSearchTag.executeQuery();
     }
 
-    public int deleteTag(String name) throws SQLException {
+    public int deleteTags(String name) throws SQLException {
         this.psDeleteTag.setString(1, name);
         return this.psDeleteTag.executeUpdate();
     }

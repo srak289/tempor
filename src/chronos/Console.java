@@ -1,11 +1,14 @@
-package chronos.console;
+package chronos;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
 import java.lang.reflect.*;
+
 import java.sql.SQLException;
 
 import org.jboss.jreadline.console.*;
@@ -13,7 +16,7 @@ import org.jboss.jreadline.console.settings.Settings;
 import org.jboss.jreadline.complete.*;
 import org.jboss.jreadline.edit.actions.Operation;
 
-import chronos.db.DatabaseClient;
+import chronos.DatabaseClient;
 
 
 public class Console implements Completion {
@@ -79,7 +82,6 @@ public class Console implements Completion {
         this.commands.put("create", "showHelp");
         this.commands.put("delete", "showHelp");
 
-        this.commands.put("show", "showCurrent");
         this.commands.put("search", "showHelp");
         this.commands.put("start", "startTask");
         this.commands.put("stop", "stopTask");
@@ -89,9 +91,6 @@ public class Console implements Completion {
 
         this.commands.put("delete tag", "deleteTag");
         this.commands.put("delete task", "deleteTask");
-
-        this.commands.put("show tags", "showTags");
-        this.commands.put("show tasks", "showTasks");
 
         this.commands.put("search tags", "searchTags");
         this.commands.put("search tasks", "searchTasks");
@@ -195,43 +194,84 @@ public class Console implements Completion {
     }
 
     private void startTask(String[] args) throws IOException {
-        this.debug("Start task");
         if (args.length == 0) {
             this.error("'start' requires <name>");
+            return;
         }
-        this.debug("Args is "+String.join(" ", args));
+        this.debug("Start task "+args[0]);
+        int r = 0;
         try {
             this.debug("Calling db.startTask with "+args[0]);
-            int result = this.db.startTask(args[0]);
-            this.debug("Result from startTask "+result);
+            r = this.db.startTask(args[0]);
+            this.debug("Result from startTask "+r);
         } catch (SQLException e) {
             e.printStackTrace();
+        }
+        if (r == 0) {
+            this.error("No task by name \""+args[0]+"\"");
         }
     }
 
     private void stopTask(String[] args) throws IOException {
-        this.info("Stopping current task");
-        // print "no task" if no task running
-        // else print report
+        this.debug("Stopping current task");
+        int r = 0;
+        try {
+            r = this.db.stopTask();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        if (r == 0) {
+            this.error("No task was running");
+        } else {
+            this.print("Stopped current task");
+            // perhaps we should print some summation of
+            // time worked etc. when the current task stops
+        }
     }
 
     private void createTag(String[] args) throws IOException {
+        int r = 0;
+        try {
+            r = this.db.createTag(args[0]);
+            this.debug("createTag result "+r);
+        } catch (SQLException e) {
+            if (e.getMessage().contains("UNIQUE")) {
+                this.error("Tag \""+args[0]+"\" already exists");
+            } else {
+                e.printStackTrace();
+            }
+        }
     }
 
     private void createTask(String[] args) throws IOException {
+        int r = 0;
         //public int createTask(String name, Date dueBy, int allowedTime) throws SQLException {
     }
 
     private void deleteTag(String[] args) throws IOException {
+        int r = 0;
+        try {
+            r = this.db.deleteTag(args[0]);
+            this.debug("deleteTag result "+r);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        if (r == 0) {
+            this.error("No tag named \""+args[0]+"\"");
+        } else {
+            this.print("Deleted tag \""+args[0]+"\"");
+        }
     }
 
     private void deleteTask(String[] args) throws IOException {
+        int r = 0;
     }
 
-    private void showTags(String[] args) throws IOException {
+    private void searchTags(String[] args) throws IOException {
+        ResultSet rs = this.db.searchTags();
     }
 
-    private void showTasks(String[] args) throws IOException {
+    private void searchTasks(String[] args) throws IOException {
     }
 
     private void clearConsole(String[] args) throws IOException {
@@ -266,7 +306,7 @@ public class Console implements Completion {
     }
 
     /**
-     * Print messages to this.console
+     * Print output to this.console
      */
     private void print(String line) throws IOException {
         this.console.pushToStdOut("\n"+line+"\n\n");
@@ -276,14 +316,14 @@ public class Console implements Completion {
      * Print info messages to this.console
      */
     private void info(String line) throws IOException {
-        this.console.pushToStdOut("\n<chronos.console.Console: INFO>: "+line+"\n\n");
+        this.console.pushToStdOut("\n<chronos.Console: INFO>: "+line+"\n\n");
     }
 
     /**
      * Print error messages to this.console
      */
     private void error(String line) throws IOException {
-        this.console.pushToStdOut("\n<chronos.console.Console: ERROR>: "+line+"\n\n");
+        this.console.pushToStdOut("\n<chronos.Console: ERROR>: "+line+"\n\n");
     }
 
     /**
@@ -292,7 +332,7 @@ public class Console implements Completion {
      */
     private void debug(String line) throws IOException {
         if (this.debug) {
-            this.console.pushToStdOut("<chronos.console.Console: DEBUG>: "+line+"\n");
+            this.console.pushToStdOut("<chronos.Console: DEBUG>: "+line+"\n");
         }
     }
 

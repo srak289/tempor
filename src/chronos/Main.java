@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.lang.reflect.*;
 
-import chronos.console.Console;
-import chronos.db.*;
+import chronos.Console;
+import chronos.DatabaseClient;
 
 import net.sourceforge.argparse4j.*;
 import net.sourceforge.argparse4j.inf.*;

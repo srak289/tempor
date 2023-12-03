@@ -24,7 +24,7 @@ run: build
 
 .PHONY: build
 build: .jclass $(JARSOURCES) $(OBJS)
-	cp schema.sql .jclass/chronos/db/
+	cp schema.sql .jclass/chronos/
 
 .jclass:
 	mkdir .jclass
