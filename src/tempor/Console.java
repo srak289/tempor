@@ -10,6 +10,7 @@ import java.util.List;
 import java.lang.reflect.*;
 
 import java.sql.SQLException;
+import java.sql.ResultSet;
 
 import org.jboss.jreadline.console.*;
 import org.jboss.jreadline.console.settings.Settings;
@@ -268,7 +269,16 @@ public class Console implements Completion {
     }
 
     private void searchTags(String[] args) throws IOException {
-        ResultSet rs = this.db.searchTags();
+        if (args.length == 0) {
+            this.error("search requires <word>");
+            return;
+        }
+        try {
+            ResultSet rs = this.db.searchTags(args[0]);
+            print(rs);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     private void searchTasks(String[] args) throws IOException {

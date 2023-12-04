@@ -190,7 +190,7 @@ public class DatabaseClient {
         return this.psSearchTag.executeQuery();
     }
 
-    public int deleteTags(String name) throws SQLException {
+    public int deleteTag(String name) throws SQLException {
         this.psDeleteTag.setString(1, name);
         return this.psDeleteTag.executeUpdate();
     }
