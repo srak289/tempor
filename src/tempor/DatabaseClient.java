@@ -12,7 +12,7 @@ public class DatabaseClient {
 
     private PreparedStatement psCreateTask;
     private PreparedStatement psAllTasks;
-    private PreparedStatement psShowTask;
+    private PreparedStatement psShowTasks;
     private PreparedStatement psStartTask;
     private PreparedStatement psStopTask;
     private PreparedStatement psDeleteTask;
@@ -121,7 +121,7 @@ public class DatabaseClient {
         this.psAllTasks = this.conn.prepareStatement(
             "SELECT * FROM task"
         );
-        this.psShowTask = this.conn.prepareStatement(
+        this.psShowTasks = this.conn.prepareStatement(
             "SELECT * FROM task WHERE name LIKE ?"
         );
         this.psStartTask = this.conn.prepareStatement(
@@ -148,6 +148,12 @@ public class DatabaseClient {
         this.psDeleteTag = this.conn.prepareStatement(
             "DELETE FROM tag WHERE name = ?"
         );
+        this.psAssignTag = this.conn.prepareStatement(
+            "INSERT INTO task_tags (task_id, tag_id) VALUES ()"
+        );
+        this.psUnassignTag = this.conn.prepareStatement(
+            "DELETE FROM task_tags WHERE task_name = task.name AND tag_name = tag.name"
+        );
     }
 
     public int createTask(String name, Date dueBy, int allowedTime) throws SQLException {
@@ -166,12 +172,12 @@ public class DatabaseClient {
         return this.psCreateTask.executeUpdate();
     }
 
-    public ResultSet showTask(String name) throws SQLException {
+    public ResultSet showTasks(String name) throws SQLException {
         if (name.equals("")) {
             return this.psAllTasks.executeQuery();
         } else {
-            this.psShowTask.setString(1, "%"+name+"%");
-            return this.psShowTask.executeQuery();
+            this.psShowTasks.setString(1, "%"+name+"%");
+            return this.psShowTasks.executeQuery();
         }
     }
 

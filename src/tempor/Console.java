@@ -294,6 +294,20 @@ public class Console implements Completion {
 
     private void deleteTask(String[] args) throws IOException {
         int r = 0;
+        if (args.length == 0) {
+            this.error("delete task requires <task_name>");
+        } else {
+            try {
+                r = this.db.deleteTask(args[0]);
+                if (r == 0) {
+                    this.error("No task \""+args[0]+"\"");
+                } else {
+                    this.print("Deleted task \""+args[0]+"\"");
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private void showTags(String[] args) throws IOException {
@@ -305,11 +319,7 @@ public class Console implements Completion {
                 rs = this.db.showTags(args[0]);
             }
             while (rs.next()) {
-                try {
-                    this.print(rs.getString(2), false);
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
+                this.print(rs.getString(2), false);
             }
             this.print("");
         } catch (SQLException e) {
@@ -318,6 +328,20 @@ public class Console implements Completion {
     }
 
     private void showTasks(String[] args) throws IOException {
+        ResultSet rs;
+        try {
+            if (args.length == 0) {
+                rs = this.db.showTasks("");
+            } else {
+                rs = this.db.showTasks(args[0]);
+            }
+            while (rs.next()) {
+                this.print(rs.getString(2), false);
+            }
+            this.print("");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     private void clearConsole(String[] args) throws IOException {
@@ -440,6 +464,9 @@ public class Console implements Completion {
             // 'create tag some thing'
             // 'create tag some'
             // 'create tag' -> MATCH break loop and return ending slice
+
+            // TODO multiple spaces should be collapsed
+            // so that 'create  tag' doesn't return no cmd
 
             this.debug("scmd is "+String.join(" ", scmd));
             for (int i = scmd.length; i > 0; i--) {
