@@ -95,6 +95,9 @@ public class Console implements Completion {
 
         this.commands.put("search tags", "searchTags");
         this.commands.put("search tasks", "searchTasks");
+
+        this.commands.put("tag", "assignTag");
+        this.commands.put("untag", "unassignTag");
     }
 
     // begin command section
@@ -175,6 +178,16 @@ public class Console implements Completion {
                         .concat("\tshow task <name>")
                     );
                     break;
+                case "tag":
+                    this.print("Help for: tag\n"
+                        .concat("\ttag <task_name> <tag_name>")
+                    );
+                    break;
+                case "untag":
+                    this.print("Help for: untag\n"
+                        .concat("\tuntag <task_name> <tag_name>")
+                    );
+                    break;
                 default:
                     this.error("No help for \""+cmd+"\"");
                     break;
@@ -189,6 +202,8 @@ public class Console implements Completion {
             .concat("\tshow <task|tag> [name]\t- show all or one of tag or task\n")
             .concat("\tcreate <task|tag> <name>\t- create a task or tag\n")
             .concat("\tdelete <task|tag> <name>\t- delete a task or tag\n")
+            .concat("\ttag <task_name> <tag_name>\t- tag <task_name> with tag <tag_name>\n")
+            .concat("\tuntag <task_name> <tag_name>\t- remove <tag_name> from <task_name>\n")
             .concat("\tquit\t\t\t\t- quit the console\n")
             .concat("\nFor more specific help run 'help <cmd>'")
         );
@@ -215,16 +230,16 @@ public class Console implements Completion {
 
     private void stopTask(String[] args) throws IOException {
         this.debug("Stopping current task");
-        int r = 0;
+        String r = "";
         try {
             r = this.db.stopTask();
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        if (r == 0) {
+        if (r.equals("")) {
             this.error("No task was running");
         } else {
-            this.print("Stopped current task");
+            this.print("Stopped task "+r);
             // perhaps we should print some summation of
             // time worked etc. when the current task stops
         }
@@ -242,6 +257,20 @@ public class Console implements Completion {
                 e.printStackTrace();
             }
         }
+    }
+
+    /**
+     * Assign tag to a task
+     */
+    private void assignTag(String[] args) throws IOException {
+
+    }
+
+    /**
+     * Remove tag from a task
+     */
+    private void unassignTag(String[] args) throws IOException {
+
     }
 
     private void createTask(String[] args) throws IOException {
@@ -269,13 +298,21 @@ public class Console implements Completion {
     }
 
     private void searchTags(String[] args) throws IOException {
-        if (args.length == 0) {
-            this.error("search requires <word>");
-            return;
-        }
+        ResultSet rs;
         try {
-            ResultSet rs = this.db.searchTags(args[0]);
-            print(rs);
+            if (args.length == 0) {
+                rs = this.db.searchTags("");
+            } else {
+                rs = this.db.searchTags(args[0]);
+            }
+            while (rs.next()) {
+                try {
+                    this.print(rs.getString(2), false);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+            this.print("");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -313,6 +350,17 @@ public class Console implements Completion {
             res[i] = s[i+start];
         }
         return res;
+    }
+
+    /**
+     * Print output to this.console
+     */
+    private void print(String line, boolean end) throws IOException {
+        String p = line;
+        if (end) {
+            p = p += "\n\n";
+        }
+        this.console.pushToStdOut("\n"+p);
     }
 
     /**
@@ -400,13 +448,6 @@ public class Console implements Completion {
 
                 this.debug("Got slice \""+cmd+"\"");
                 cmd = this.commands.get(cmd);
-
-                // WISHLIST:
-                // if we want unambiguous shorthand
-                // we should make best-effort matches with short words
-                // e.g. c tas -> create task
-                // or q -> quit
-                // or cl -> clear
 
                 if (cmd != null) {
                     this.debug("Found method to call "+cmd);

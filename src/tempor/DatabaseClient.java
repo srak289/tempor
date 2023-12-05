@@ -11,6 +11,7 @@ public class DatabaseClient {
     private boolean debug;
 
     private PreparedStatement psCreateTask;
+    private PreparedStatement psAllTasks;
     private PreparedStatement psSearchTask;
     private PreparedStatement psStartTask;
     private PreparedStatement psStopTask;
@@ -20,6 +21,7 @@ public class DatabaseClient {
 
     private PreparedStatement psCreateTag;
     private PreparedStatement psSearchTag;
+    private PreparedStatement psAllTags;
     private PreparedStatement psDeleteTag;
 
 
@@ -116,8 +118,11 @@ public class DatabaseClient {
         this.psCreateTask = this.conn.prepareStatement(
             "INSERT INTO task (name, due_by, allowed_time) VALUES (?, ?, ?)"
         );
+        this.psAllTasks = this.conn.prepareStatement(
+            "SELECT * FROM task"
+        );
         this.psSearchTask = this.conn.prepareStatement(
-            "SELECT * FROM task WHERE name = ?"
+            "SELECT * FROM task WHERE name LIKE ?"
         );
         this.psStartTask = this.conn.prepareStatement(
             "UPDATE task SET in_progress = True WHERE name = ?"
@@ -134,8 +139,11 @@ public class DatabaseClient {
         this.psCreateTag = this.conn.prepareStatement(
             "INSERT INTO tag (name) VALUES (?)"
         );
+        this.psAllTags = this.conn.prepareStatement(
+            "SELECT * FROM tag"
+        );
         this.psSearchTag = this.conn.prepareStatement(
-            "SELECT * FROM tag WHERE name = ?"
+            "SELECT * FROM tag WHERE name LIKE ?"
         );
         this.psDeleteTag = this.conn.prepareStatement(
             "DELETE FROM tag WHERE name = ?"
@@ -159,8 +167,12 @@ public class DatabaseClient {
     }
 
     public ResultSet searchTask(String name) throws SQLException {
-        this.psSearchTask.setString(1, name);
-        return this.psSearchTask.executeQuery();
+        if (name.equals("")) {
+            return this.psAllTasks.executeQuery();
+        } else {
+            this.psSearchTask.setString(1, "%"+name+"%");
+            return this.psSearchTask.executeQuery();
+        }
     }
 
     public int startTask(String name) throws SQLException {
@@ -169,10 +181,20 @@ public class DatabaseClient {
         return this.psStartTask.executeUpdate();
     }
 
-    public int stopTask() throws SQLException {
+    /**
+     * Stops the current task
+     * Returns the name of the stopped task
+     */
+    public String stopTask() throws SQLException {
         // might be nice to run a query and return name
         // of the task we stopped
-        return this.psStopTask.executeUpdate();
+        String t = this.psRunningTask.executeQuery().getString(2);
+        int r = this.psStopTask.executeUpdate();
+        if (r == 1) {
+            return t;
+        } else {
+            return "";
+        }
     }
 
     public int deleteTask(String name) throws SQLException {
@@ -186,8 +208,12 @@ public class DatabaseClient {
     }
 
     public ResultSet searchTags(String name) throws SQLException {
-        this.psSearchTag.setString(1, name);
-        return this.psSearchTag.executeQuery();
+        if (name.equals("")) {
+            return this.psAllTags.executeQuery();
+        } else {
+            this.psSearchTag.setString(1, "%"+name+"%");
+            return this.psSearchTag.executeQuery();
+        }
     }
 
     public int deleteTag(String name) throws SQLException {
