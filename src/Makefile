@@ -68,5 +68,5 @@ sources: $(JARSOURCES)
 
 .jar/%.jar: .jar
 	$(eval JARURL=$(shell grep $(patsubst .jar/%,%,$@) JARURL.txt))
-	wget $(JARURL) -O $@
+	curl -skL $(JARURL) -o $@
 	touch $@
