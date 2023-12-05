@@ -1,18 +1,18 @@
 run:
 	$(MAKE) -C src
 
-runjar: chronos.jar
-	java -jar chronos.jar
+runjar: tempor.jar
+	java -jar tempor.jar
 
-jar: chronos.jar
+jar: tempor.jar
 
-chronos.jar:
-	$(MAKE) -C src chronos.jar
-	mv src/chronos.jar .
+tempor.jar:
+	$(MAKE) -C src tempor.jar
+	mv src/tempor.jar .
 
 build:
 	$(MAKE) -C src build
 
 clean:
 	$(MAKE) -C src clean
-	rm chronos.jar
+	rm tempor.jar
