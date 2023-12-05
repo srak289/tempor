@@ -64,7 +64,6 @@ public class Console implements Completion {
     private void initCommands() {
         // create <tag|task> <name> [allowed_hours] [due_date]
         // show [tags,tasks]
-        // search <tags|tasks> <name>
         // tag <name> <tag_name>
         // untag <name> <tag_name>
         // start <task_name> (can start while another task is started, it will stop the current)
@@ -80,10 +79,6 @@ public class Console implements Completion {
         this.commands.put("quit", "quitConsole");
         this.commands.put("clear", "clearConsole");
 
-        this.commands.put("create", "showHelp");
-        this.commands.put("delete", "showHelp");
-
-        this.commands.put("search", "showHelp");
         this.commands.put("start", "startTask");
         this.commands.put("stop", "stopTask");
 
@@ -93,8 +88,8 @@ public class Console implements Completion {
         this.commands.put("delete tag", "deleteTag");
         this.commands.put("delete task", "deleteTask");
 
-        this.commands.put("search tags", "searchTags");
-        this.commands.put("search tasks", "searchTasks");
+        this.commands.put("show tags", "showTags");
+        this.commands.put("show tasks", "showTasks");
 
         this.commands.put("tag", "assignTag");
         this.commands.put("untag", "unassignTag");
@@ -168,14 +163,18 @@ public class Console implements Completion {
                         .concat("\tdelete task <name>")
                     );
                     break;
-                case "show tag":
+                case "show tags":
                     this.print("Help for: show tag\n"
-                        .concat("\tshow tag <name>")
+                        .concat("\tshow tags [name]\n")
+                        .concat("*if name is not given show all tags\n")
+                        .concat("*name may be short and will be used in a glob match")
                     );
                     break;
-                case "show task":
+                case "show tasks":
                     this.print("Help for: show task\n"
-                        .concat("\tshow task <name>")
+                        .concat("\tshow tasks [name]\n")
+                        .concat("*if name is not given show all tags\n")
+                        .concat("*name may be short and will be used in a glob match")
                     );
                     break;
                 case "tag":
@@ -297,13 +296,13 @@ public class Console implements Completion {
         int r = 0;
     }
 
-    private void searchTags(String[] args) throws IOException {
+    private void showTags(String[] args) throws IOException {
         ResultSet rs;
         try {
             if (args.length == 0) {
-                rs = this.db.searchTags("");
+                rs = this.db.showTags("");
             } else {
-                rs = this.db.searchTags(args[0]);
+                rs = this.db.showTags(args[0]);
             }
             while (rs.next()) {
                 try {
@@ -318,7 +317,7 @@ public class Console implements Completion {
         }
     }
 
-    private void searchTasks(String[] args) throws IOException {
+    private void showTasks(String[] args) throws IOException {
     }
 
     private void clearConsole(String[] args) throws IOException {

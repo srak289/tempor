@@ -12,7 +12,7 @@ public class DatabaseClient {
 
     private PreparedStatement psCreateTask;
     private PreparedStatement psAllTasks;
-    private PreparedStatement psSearchTask;
+    private PreparedStatement psShowTask;
     private PreparedStatement psStartTask;
     private PreparedStatement psStopTask;
     private PreparedStatement psDeleteTask;
@@ -20,7 +20,7 @@ public class DatabaseClient {
     private PreparedStatement psRunningTask;
 
     private PreparedStatement psCreateTag;
-    private PreparedStatement psSearchTag;
+    private PreparedStatement psShowTag;
     private PreparedStatement psAllTags;
     private PreparedStatement psDeleteTag;
 
@@ -121,7 +121,7 @@ public class DatabaseClient {
         this.psAllTasks = this.conn.prepareStatement(
             "SELECT * FROM task"
         );
-        this.psSearchTask = this.conn.prepareStatement(
+        this.psShowTask = this.conn.prepareStatement(
             "SELECT * FROM task WHERE name LIKE ?"
         );
         this.psStartTask = this.conn.prepareStatement(
@@ -142,7 +142,7 @@ public class DatabaseClient {
         this.psAllTags = this.conn.prepareStatement(
             "SELECT * FROM tag"
         );
-        this.psSearchTag = this.conn.prepareStatement(
+        this.psShowTag = this.conn.prepareStatement(
             "SELECT * FROM tag WHERE name LIKE ?"
         );
         this.psDeleteTag = this.conn.prepareStatement(
@@ -166,12 +166,12 @@ public class DatabaseClient {
         return this.psCreateTask.executeUpdate();
     }
 
-    public ResultSet searchTask(String name) throws SQLException {
+    public ResultSet showTask(String name) throws SQLException {
         if (name.equals("")) {
             return this.psAllTasks.executeQuery();
         } else {
-            this.psSearchTask.setString(1, "%"+name+"%");
-            return this.psSearchTask.executeQuery();
+            this.psShowTask.setString(1, "%"+name+"%");
+            return this.psShowTask.executeQuery();
         }
     }
 
@@ -207,12 +207,12 @@ public class DatabaseClient {
         return this.psCreateTag.executeUpdate();
     }
 
-    public ResultSet searchTags(String name) throws SQLException {
+    public ResultSet showTags(String name) throws SQLException {
         if (name.equals("")) {
             return this.psAllTags.executeQuery();
         } else {
-            this.psSearchTag.setString(1, "%"+name+"%");
-            return this.psSearchTag.executeQuery();
+            this.psShowTag.setString(1, "%"+name+"%");
+            return this.psShowTag.executeQuery();
         }
     }
 
