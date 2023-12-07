@@ -246,30 +246,48 @@ public class Console implements Completion {
 
     private void createTag(String[] args) throws IOException {
         int r = 0;
-        try {
-            r = this.db.createTag(args[0]);
-            this.debug("createTag result "+r);
-        } catch (SQLException e) {
-            if (e.getMessage().contains("UNIQUE")) {
-                this.error("Tag \""+args[0]+"\" already exists");
-            } else {
+        if (args.length < 1) {
+            this.showHelp(new String[]{"create tag"});
+        } else {
+            try {
+                r = this.db.createTag(args[0]);
+                this.debug("createTag result "+r);
+            } catch (SQLException e) {
+                if (e.getMessage().contains("UNIQUE")) {
+                    this.error("Tag \""+args[0]+"\" already exists");
+                } else {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private void assignTag(String[] args) throws IOException {
+        int r = 0;
+        if (args.length < 2) {
+            this.showHelp(new String[]{"tag"});
+        } else {
+            try {
+                r = this.db.assignTag(args[0], args[1]);
+                this.debug("Assigning "+args[0]+" from "+args[1]);
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    /**
-     * Assign tag to a task
-     */
-    private void assignTag(String[] args) throws IOException {
-
-    }
-
-    /**
-     * Remove tag from a task
-     */
     private void unassignTag(String[] args) throws IOException {
-
+        int r = 0;
+        if (args.length < 2) {
+            this.showHelp(new String[]{"untag"});
+        } else {
+            try {
+                r = this.db.unassignTag(args[0], args[1]);
+                this.debug("Unassigning "+args[0]+" from "+args[1]);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private void createTask(String[] args) throws IOException {

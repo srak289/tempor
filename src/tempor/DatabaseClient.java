@@ -22,6 +22,8 @@ public class DatabaseClient {
     private PreparedStatement psCreateTag;
     private PreparedStatement psShowTag;
     private PreparedStatement psAllTags;
+    private PreparedStatement psAssignTag;
+    private PreparedStatement psUnassignTag;
     private PreparedStatement psDeleteTag;
 
 
@@ -149,10 +151,19 @@ public class DatabaseClient {
             "DELETE FROM tag WHERE name = ?"
         );
         this.psAssignTag = this.conn.prepareStatement(
-            "INSERT INTO task_tags (task_id, tag_id) VALUES ()"
+            "INSERT INTO task_tags (task_id, tag_id) VALUES "
+            .concat("(")
+            .concat("(SELECT id FROM task WHERE name = ?),")
+            .concat("(SELECT id FROM tag WHERE name = ?)")
+            .concat(")")
         );
         this.psUnassignTag = this.conn.prepareStatement(
-            "DELETE FROM task_tags WHERE task_name = task.name AND tag_name = tag.name"
+            "DELETE FROM task_tags WHERE "
+            .concat("task_id = ")
+            .concat("(SELECT id FROM task WHERE name = ?)")
+            .concat(" AND ")
+            .concat("tag_id =")
+            .concat("(SELECT id FROM tag WHERE name = ?)")
         );
     }
 
@@ -225,5 +236,17 @@ public class DatabaseClient {
     public int deleteTag(String name) throws SQLException {
         this.psDeleteTag.setString(1, name);
         return this.psDeleteTag.executeUpdate();
+    }
+
+    public int assignTag(String task, String tag) throws SQLException {
+        this.psAssignTag.setString(1, task);
+        this.psAssignTag.setString(2, tag);
+        return this.psAssignTag.executeUpdate();
+    }
+
+    public int unassignTag(String task, String tag) throws SQLException {
+        this.psUnassignTag.setString(1, task);
+        this.psUnassignTag.setString(2, tag);
+        return this.psUnassignTag.executeUpdate();
     }
 }
