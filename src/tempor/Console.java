@@ -7,6 +7,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
+
 import java.lang.reflect.*;
 
 import java.sql.SQLException;
@@ -23,9 +26,9 @@ import tempor.DatabaseClient;
 public class Console implements Completion {
 
     private org.jboss.jreadline.console.Console console;
-    private Completion completer;
     private DatabaseClient db;
     private HashMap<String, String> commands;
+    private static final Pattern p = Pattern.compile("\"([^\"]+)\"");
     private boolean debug;
 
     public Console(DatabaseClient db, boolean debug) throws IOException {
@@ -93,6 +96,8 @@ public class Console implements Completion {
 
         this.commands.put("tag", "assignTag");
         this.commands.put("untag", "unassignTag");
+
+        this.commands.put("report", "printReport");
     }
 
     // begin command section
@@ -351,6 +356,7 @@ public class Console implements Completion {
             if (args.length == 0) {
                 rs = this.db.showTasks("");
             } else {
+                args = this.regexQuotes(args);
                 rs = this.db.showTasks(args[0]);
             }
             while (rs.next()) {
@@ -374,6 +380,74 @@ public class Console implements Completion {
         System.exit(0);
     }
     // end command section
+
+    private String[] regexQuotes(String[] args) throws IOException {
+        Matcher m = Console.p.matcher(String.join(" ", args));
+        this.debug("Matching with pattern "+Console.p.pattern()+ " against "+String.join(" ", args));
+        if (!m.matches()) {
+            this.debug("No match!");
+            return args;
+        } else {
+            this.debug("Matched! "+m.groupCount());
+        }
+        return args;
+    }
+
+    /**
+     * Returns a String[]
+     * of strings joined by those that were quoted
+     * e.g. ['"some', 'string', 'here"', 'yes']
+     * would return ['some string here' ,'yes']
+     */
+    private String[] parseQuotes(String[] args) throws IOException {
+        String[] s = new String[args.length];
+        String f = String.join(" ", args);
+
+        int fp = f.indexOf('"');
+
+        if (fp == -1) {
+            this.debug("No quotes found in "+String.join(" ", args));
+            return args;
+        }
+
+        // keep track of the quote count
+        int qc = 1;
+        this.debug("Attempting quotes parse for "+f);
+        for (int i = 0; i < s.length; i++) {
+            this.debug("fp is "+fp+" f is "+f);
+            if (fp != f.length()-2) {
+                s[i] = f.substring(fp, f.indexOf('"', fp+1));
+                this.debug("Set index "+i+" to "+s[i]);
+            } else {
+                s[i] = f.substring(fp, f.length());
+                this.debug("Set index "+i+" to "+s[i]);
+            }
+            fp = f.indexOf('"', fp+1);
+        }
+
+        // compute the final array length to return
+        int flen = 0;
+        for (int i = 0; i < s.length; i++) {
+            if (s[i].isEmpty()) {
+                break;
+            } else {
+                flen = i;
+                this.debug("Result arr length will be "+flen);
+            }
+        }
+
+        String[] ret = new String[flen];
+        for (int i = 0; i < ret.length; i++) {
+            this.debug("Copying "+s[i]+" to result");
+            ret[i] = s[i];
+        }
+
+        if (qc > 0) {
+            throw new IOException("Mismatched quotes for "+String.join(" ", args));
+        }
+
+        return ret;
+    }
 
     /**
      * Return a new String[] of String[] s
