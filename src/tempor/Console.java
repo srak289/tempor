@@ -356,7 +356,7 @@ public class Console implements Completion {
             if (args.length == 0) {
                 rs = this.db.showTasks("");
             } else {
-                args = this.regexQuotes(args);
+                args = this.gatherQuotes(args);
                 rs = this.db.showTasks(args[0]);
             }
             while (rs.next()) {
@@ -381,72 +381,70 @@ public class Console implements Completion {
     }
     // end command section
 
-    private String[] regexQuotes(String[] args) throws IOException {
-        Matcher m = Console.p.matcher(String.join(" ", args));
-        this.debug("Matching with pattern "+Console.p.pattern()+ " against "+String.join(" ", args));
-        if (!m.matches()) {
+    /**
+     * Gather quoted strings to array indexes
+     *
+     * example: ['"some', 'thing' ,'here"', 'foo']
+     * becomes: ['some thing here', 'foo']
+     */
+    private String[] gatherQuotes(String[] args) throws IOException {
+        String s = String.join(" ", args);
+        Matcher m = Console.p.matcher(s);
+
+        this.debug("Attempting match with pattern "+Console.p.pattern()+ " against "+s);
+
+        // short-circuit if we don't need to parse quotes
+        if (!m.find()) {
             this.debug("No match!");
             return args;
-        } else {
-            this.debug("Matched! "+m.groupCount());
-        }
-        return args;
-    }
-
-    /**
-     * Returns a String[]
-     * of strings joined by those that were quoted
-     * e.g. ['"some', 'string', 'here"', 'yes']
-     * would return ['some string here' ,'yes']
-     */
-    private String[] parseQuotes(String[] args) throws IOException {
-        String[] s = new String[args.length];
-        String f = String.join(" ", args);
-
-        int fp = f.indexOf('"');
-
-        if (fp == -1) {
-            this.debug("No quotes found in "+String.join(" ", args));
-            return args;
         }
 
-        // keep track of the quote count
-        int qc = 1;
-        this.debug("Attempting quotes parse for "+f);
-        for (int i = 0; i < s.length; i++) {
-            this.debug("fp is "+fp+" f is "+f);
-            if (fp != f.length()-2) {
-                s[i] = f.substring(fp, f.indexOf('"', fp+1));
-                this.debug("Set index "+i+" to "+s[i]);
-            } else {
-                s[i] = f.substring(fp, f.length());
-                this.debug("Set index "+i+" to "+s[i]);
+        this.debug("Matched!");
+
+        int offset = 0;
+        int start = 0;
+        int end = m.start(0);
+
+        ArrayList<String> res = new ArrayList<String>();
+
+        while (true) {
+            if (start != end) {
+                // we need to preserve the original args
+                // while collapsing the quoted strings
+                //
+                // we have a string to capture
+                // and then split by spaces
+                // and insert into the arraylist
+                this.debug("Pushing unquoted substring "+s.substring(start, end).strip()+" to results");
+                res.add(s.substring(start, end).strip());
             }
-            fp = f.indexOf('"', fp+1);
-        }
 
-        // compute the final array length to return
-        int flen = 0;
-        for (int i = 0; i < s.length; i++) {
-            if (s[i].isEmpty()) {
+            this.debug("Offset is "+offset);
+
+            // group 1 because we do not want the quotes
+            this.debug("Adding "+m.group(1)+" to result");
+            res.add(m.group(1));
+
+            // end 0 so we don't recapture the quote
+            offset = m.end(0);
+
+            if (!m.find(offset)) {
+                // this break has to move if we have trailing args
+                // after the last double quoted argument
+                // because we don't currently capture the end
+
+                // if end < s.length()
+                // perhaps we check here for the last arg
+                // but we may need to reset end=
+                // first
                 break;
-            } else {
-                flen = i;
-                this.debug("Result arr length will be "+flen);
             }
+            start = offset;
+            end = m.start(0);
         }
-
-        String[] ret = new String[flen];
-        for (int i = 0; i < ret.length; i++) {
-            this.debug("Copying "+s[i]+" to result");
-            ret[i] = s[i];
-        }
-
-        if (qc > 0) {
-            throw new IOException("Mismatched quotes for "+String.join(" ", args));
-        }
-
-        return ret;
+        // we should convert our arraylist back to String[]
+        // and return it
+        return res.toArray(new String[0]);
     }
 
     /**

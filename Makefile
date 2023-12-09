@@ -21,3 +21,4 @@ build:
 clean:
 	$(MAKE) -C src clean
 	rm tempor.jar
+	rm time.db
