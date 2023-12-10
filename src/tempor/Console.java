@@ -407,6 +407,7 @@ public class Console implements Completion {
 
         ArrayList<String> res = new ArrayList<String>();
 
+        // this could maybe be cleaned up but it works for now
         while (true) {
             if (start != end) {
                 // we need to preserve the original args
@@ -415,8 +416,11 @@ public class Console implements Completion {
                 // we have a string to capture
                 // and then split by spaces
                 // and insert into the arraylist
-                this.debug("Pushing unquoted substring "+s.substring(start, end).strip()+" to results");
-                res.add(s.substring(start, end).strip());
+                String st = s.substring(start, end).strip();
+                if (!st.isEmpty()) {
+                    this.debug("Pushing unquoted substring "+st+" to results");
+                    res.add(st);
+                }
             }
 
             this.debug("Offset is "+offset);
@@ -429,14 +433,18 @@ public class Console implements Completion {
             offset = m.end(0);
 
             if (!m.find(offset)) {
-                // this break has to move if we have trailing args
-                // after the last double quoted argument
-                // because we don't currently capture the end
-
                 // if end < s.length()
                 // perhaps we check here for the last arg
-                // but we may need to reset end=
-                // first
+                start = offset;
+                if (start < s.length()) {
+                    this.debug("Capturing remaining end");
+                    String st = s.substring(start, s.length()).strip();
+                    if (!st.isEmpty()) {
+                        this.debug("Pushing unquoted substring "+st+" to results");
+                        res.add(st);
+                    }
+                }
+                this.debug("Breaking loop");
                 break;
             }
             start = offset;
