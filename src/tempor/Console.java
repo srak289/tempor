@@ -356,7 +356,6 @@ public class Console implements Completion {
             if (args.length == 0) {
                 rs = this.db.showTasks("");
             } else {
-                args = this.gatherQuotes(args);
                 rs = this.db.showTasks(args[0]);
             }
             while (rs.next()) {
@@ -597,8 +596,11 @@ public class Console implements Completion {
                 args = new String[0];
             }
 
+            // gather quoted strings
+            args = this.gatherQuotes(args);
+
             this.debug("Calling function \""+cmd+"\""
-                .concat(" with args \""+String.join(" ", args)+"\"")
+                .concat(" with args \""+String.join(", ", args)+"\"")
             );
 
             // we use reflection to call the method specified in the command hashmap
