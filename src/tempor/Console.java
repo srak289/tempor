@@ -6,6 +6,10 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Date;
+
+import java.text.SimpleDateFormat;
+import java.text.ParseException;
 
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
@@ -29,6 +33,8 @@ public class Console implements Completion {
     private DatabaseClient db;
     private HashMap<String, String> commands;
     private static final Pattern p = Pattern.compile("\"([^\"]+)\"");
+    private static final Pattern datePattern = Pattern.compile("\\d{8}");
+    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
     private boolean debug;
 
     public Console(DatabaseClient db, boolean debug) throws IOException {
@@ -145,7 +151,7 @@ public class Console implements Completion {
                     break;
                 case "show":
                     this.print("Help for: show\n"
-                        .concat("\tshow <task|tag> <name>")
+                        .concat("\tshow <tasks|tags> <name>")
                     );
                     break;
                 case "create tag":
@@ -169,16 +175,16 @@ public class Console implements Completion {
                     );
                     break;
                 case "show tags":
-                    this.print("Help for: show tag\n"
+                    this.print("Help for: show tags\n"
                         .concat("\tshow tags [name]\n")
-                        .concat("*if name is not given show all tags\n")
+                        .concat("\n*if name is not given show all tags\n")
                         .concat("*name may be short and will be used in a glob match")
                     );
                     break;
                 case "show tasks":
-                    this.print("Help for: show task\n"
+                    this.print("Help for: show tasks\n"
                         .concat("\tshow tasks [name]\n")
-                        .concat("*if name is not given show all tags\n")
+                        .concat("\n*if name is not given show all tags\n")
                         .concat("*name may be short and will be used in a glob match")
                     );
                     break;
@@ -209,6 +215,7 @@ public class Console implements Completion {
             .concat("\ttag <task_name> <tag_name>\t- tag <task_name> with tag <tag_name>\n")
             .concat("\tuntag <task_name> <tag_name>\t- remove <tag_name> from <task_name>\n")
             .concat("\tquit\t\t\t\t- quit the console\n")
+            .concat("\nStrings with spaces MUST use double-quotes e.g. \"Some Tag\"\n")
             .concat("\nFor more specific help run 'help <cmd>'")
         );
     }
@@ -244,7 +251,7 @@ public class Console implements Completion {
             this.error("No task was running");
         } else {
             this.print("Stopped task "+r);
-            // perhaps we should print some summation of
+            // TODO perhaps we should print some summation of
             // time worked etc. when the current task stops
         }
     }
@@ -297,7 +304,48 @@ public class Console implements Completion {
 
     private void createTask(String[] args) throws IOException {
         int r = 0;
+        Date d = null;
+        int allowedTime = 0;
         //public int createTask(String name, Date dueBy, int allowedTime) throws SQLException {
+
+        if (args.length > 1) {
+            Matcher dateMatcher = datePattern.matcher(args[1]);
+            if (!dateMatcher.matches()){
+                this.error("Date pattern does not match yyyyMMdd "+args[1]);
+                // the gatherQuotes function has matched without quotes at the start...
+                return;
+            }
+            try {
+                d = Console.dateFormat.parse(args[1]);
+            } catch (ParseException e) {
+                this.error("Could not parse date from "+args[1]);
+                return;
+            }
+            this.debug("DueBy "+d);
+        }
+
+        if (args.length > 2) {
+            try {
+
+                allowedTime = Integer.parseInt(args[2]);
+            } catch (NumberFormatException e) {
+                this.error("Could not parse allowedTime from "+args[2]);
+                return;
+            }
+
+            this.debug("AllowedTime "+allowedTime);
+        }
+
+        // we assume date was retrieved if 
+        if (allowedTime != 0) {
+            if (d == null) {
+                this.error("Could not parse date "+args[1]);
+            }
+        }
+
+        if (d != null) {
+        }
+        //this.db.createTask();
     }
 
     private void deleteTag(String[] args) throws IOException {
