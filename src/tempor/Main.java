@@ -23,9 +23,13 @@ public class Main {
             Namespace parsed_args = null;
             ap.addArgument("--dbpath");
             ap.addArgument("--debug").action(Arguments.storeTrue());
+            ap.addArgument("--demo").action(Arguments.storeTrue());
             parsed_args = ap.parseArgs(args);
             if (parsed_args.get("debug")) {
-                System.out.println("Parsed args \""+parsed_args+"\"");
+                System.out.println("parsed args \""+parsed_args+"\"");
+            }
+            if (parsed_args.get("demo")) {
+                System.out.println("loading demo...");
             }
 
             // argparse guarantees we won't get an empty argument if the `--dbpath`
@@ -35,7 +39,8 @@ public class Main {
             // if the client gets `null` it will use the default path (./time.db)
             DatabaseClient db = new DatabaseClient(
                 parsed_args.get("dbpath"),
-                parsed_args.get("debug")
+                parsed_args.get("debug"),
+                parsed_args.get("demo")
             );
             db.connect();
             db.setupTables();

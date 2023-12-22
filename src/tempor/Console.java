@@ -142,7 +142,9 @@ public class Console implements Completion {
                     break;
                 case "create":
                     this.print("Help for: create\n"
-                        .concat("\tcreate <task|tag> <name>")
+                        .concat("\tcreate <task|tag> <name> [dueBy] [allowedTime]")
+                        .concat("*dueBy should be in the format yyyMMdd")
+                        .concat("*allowedTime should be an integer in minutes")
                     );
                     break;
                 case "delete":
@@ -213,9 +215,9 @@ public class Console implements Completion {
         }
 
         this.print("General Help\n\ntempor>\n"
-            .concat("\tstart <task_name>\t\t- start a task\n")
-            .concat("\tstop\t\t\t\t- stop the current task\n")
-            .concat("\tshow <task|tag> [name]\t- show all or one of tag or task\n")
+            .concat("\tstart <task_name>\t\t\t- start a task\n")
+            .concat("\tstop\t\t\t\t\t\t- stop the current task\n")
+            .concat("\tshow <tasks|tags> [name]\t\t- show all or one of tag or task\n")
             .concat("\tcreate <task|tag> <name>\t- create a task or tag\n")
             .concat("\tdelete <task|tag> <name>\t- delete a task or tag\n")
             .concat("\ttag <task_name> <tag_name>\t- tag <task_name> with tag <tag_name>\n")
@@ -315,7 +317,6 @@ public class Console implements Completion {
         int r = 0;
         Date d = null;
         int allowedTime = 0;
-        //public int createTask(String name, Date dueBy, int allowedTime) throws SQLException {
 
         if (args.length > 1) {
             Matcher dateMatcher = datePattern.matcher(args[1]);
@@ -337,6 +338,8 @@ public class Console implements Completion {
             try {
 
                 allowedTime = Integer.parseInt(args[2]);
+                // The user inputs allowedTime as minutes but we store it as seconds
+                allowedTime = allowedTime * 60;
             } catch (NumberFormatException e) {
                 this.error("Could not parse allowedTime from "+args[2]);
                 return;

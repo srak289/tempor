@@ -6,6 +6,10 @@ run:
 runjar: tempor.jar
 	java -jar tempor.jar
 
+.PHONY: rundemo
+rundemo: tempor.jar
+	java -jar tempor.jar --demo
+
 .PHONY: jar
 jar: tempor.jar
 

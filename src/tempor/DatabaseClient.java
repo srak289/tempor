@@ -12,6 +12,7 @@ public class DatabaseClient {
     private String url;
 
     private boolean debug;
+    private boolean demo;
 
     private PreparedStatement psCreateTask;
     private PreparedStatement psAllTasks;
@@ -39,8 +40,9 @@ public class DatabaseClient {
      * @param   debug   print debug information
      * @return          the initialized object
      */
-    public DatabaseClient(String url, boolean debug) {
+    public DatabaseClient(String url, boolean debug, boolean demo) {
         this.debug = debug;
+        this.demo = demo;
         if (url != null) {
             this.url = "jdbc:sqlite:"+url;
         } else {
@@ -83,6 +85,50 @@ public class DatabaseClient {
         }
         this.conn = DriverManager.getConnection(this.url);
     }
+
+    /**
+     * Load demo data
+     */
+    public void loadDemo() throws
+        IOException,
+        SQLException
+    {
+
+        Statement stmt = this.conn.createStatement();
+
+        BufferedReader reader = new BufferedReader(
+            new InputStreamReader(
+                this.getClass().getResourceAsStream("demo.sql")
+            )
+        );
+        String line, sql = "";
+        // read table statements from schema.sql and batch them
+        while ((line = reader.readLine()) != null) {
+            if (
+                line.startsWith("--") ||
+                line.isEmpty()
+            ) {
+                this.debug("Skipping empty or commented line");
+                continue;
+            // We split our batches on lines that contain a single ';'
+            // in order to avoid errors defining triggers
+            } else if (
+                line.equals(";") ||
+                line.equals(");")
+            ) {
+                sql += line+"\n";
+                this.debug("Adding batch statement\n"+sql);
+                stmt.addBatch(sql);
+                sql = "";
+            } else {
+                this.debug("Concat line\n"+line);
+                sql += line+"\n";
+            }
+        }
+
+        this.debug("Execute demo batch");
+        stmt.executeBatch();
+    }  
 
     /**
      * Initialize the database for our app
@@ -129,6 +175,10 @@ public class DatabaseClient {
 
         // prepare our statements after the database is initialized
         this.prepareStatements();
+
+        if (this.demo) {
+            this.loadDemo();
+        }
     }  
 
     // use prepared statements to avoid SQL issues
@@ -194,7 +244,7 @@ public class DatabaseClient {
      * <br>
      * @param   name        the name of the task
      * @param   dueBy       the due date
-     * @param   allowedTime the the amount of time allowed for the task in minutes
+     * @param   allowedTime the the amount of time allowed for the task in seconds
      * @return              the number of rows affected
      */
     public int createTask(String name, java.util.Date dueBy, int allowedTime) throws SQLException {

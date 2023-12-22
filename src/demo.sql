@@ -1,5 +1,3 @@
-BEGIN;
-
 INSERT INTO task (id, name, time_started, time_stopped, time_worked) VALUES
     (
         0,
@@ -49,14 +47,15 @@ INSERT INTO task (id, name, time_started, time_stopped, time_worked) VALUES
         (SELECT DATETIME(CURRENT_TIMESTAMP, '-27 hours')),
         (SELECT DATETIME(CURRENT_TIMESTAMP, '-24 hours')),
         7200
-    );
+);
 
 INSERT INTO tag (id, name) VALUES
     (0, 'High Importance'),
     (1, 'Do later'),
     (3, 'School'),
     (4, 'Home'),
-    (2, 'Probably never');
+    (2, 'Probably never')
+;
 
 INSERT INTO task_tags (task_id, tag_id) VALUES
     (0, 1),
@@ -67,11 +66,12 @@ INSERT INTO task_tags (task_id, tag_id) VALUES
     (2, 2),
     (4, 2),
     (5, 0),
-    (3, 1);
+    (3, 1)
+;
 
 
-UPDATE task SET in_progress = True WHERE id = 5;
+UPDATE task SET in_progress = True WHERE id = 5
+;
 
-UPDATE task SET in_progress = NULL WHERE id = 5;
-
-COMMIT;
+UPDATE task SET in_progress = NULL WHERE id = 5
+;

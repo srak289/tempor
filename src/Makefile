@@ -19,6 +19,10 @@ SRCS != find . -name \*.java
 OBJS := $(patsubst %.java,.jclass/%.class,$(SRCS))
 
 .PHONY:
+rundemo: build
+	$(MAKE) -- run --demo
+
+.PHONY:
 rundebug: build
 	$(MAKE) -- run --debug
 
@@ -29,6 +33,7 @@ run: build
 .PHONY: build
 build: .jclass $(JARSOURCES) $(OBJS)
 	cp schema.sql .jclass/tempor/
+	cp demo.sql .jclass/tempor/
 
 .jclass:
 	mkdir .jclass
@@ -42,7 +47,7 @@ debug: build
 
 .PHONY: clean
 clean:
-	rm -rf .jclass tempor.jar
+	rm -rf .jclass tempor.jar time.db
 
 .PHONY: rebuild
 rebuild: clean build
