@@ -527,10 +527,12 @@ public class Console implements Completion {
                 start = offset;
                 if (start < s.length()) {
                     this.debug("Capturing remaining end");
-                    String st = s.substring(start, s.length()).strip();
-                    if (!st.isEmpty()) {
+                    String[] st = s.substring(start, s.length()).strip().split(" ");
+                    if (st.length > 0) {
                         this.debug("Pushing unquoted substring "+st+" to results");
-                        res.add(st);
+                        for (int i = 0; i < st.length; i++) {
+                            res.add(st[i]);
+                        }
                     }
                 }
                 this.debug("Breaking loop");
