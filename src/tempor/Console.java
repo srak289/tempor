@@ -243,7 +243,9 @@ public class Console implements Completion {
         }
         if (r == 0) {
             this.error("No task by name \""+args[0]+"\"");
+            return;
         }
+        this.print("Started task "+args[0]);
     }
 
     private void stopTask(String[] args) throws IOException {

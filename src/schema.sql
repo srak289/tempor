@@ -113,7 +113,7 @@ CREATE VIEW IF NOT EXISTS vw_tasks_by_tag AS
 
 CREATE VIEW IF NOT EXISTS vw_time_per_tag AS
 -- divide by 3600 to get hours back
-    SELECT tg.name AS tag_name, ROUND(TOTAL(ta.time_worked)/3600, 2) AS hours_worked
+    SELECT tg.name AS tag_name, ROUND(TOTAL(ta.time_worked)/3600.0, 2) AS hours_worked
     FROM task AS ta
     JOIN task_tags ON task_id = ta.id
     JOIN tag AS tg ON tag_id = tg.id
@@ -122,6 +122,6 @@ CREATE VIEW IF NOT EXISTS vw_time_per_tag AS
 
 CREATE VIEW IF NOT EXISTS vw_time_per_task AS
 -- divide by 3600 to get hours back
-    SELECT ta.name AS task_name, ROUND(ta.time_worked/3600, 2) AS hours_worked
+    SELECT ta.name AS task_name, ROUND(ta.time_worked/3600.0, 2) AS hours_worked
     FROM task AS ta
 ;
