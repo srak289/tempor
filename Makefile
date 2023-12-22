@@ -10,9 +10,6 @@ runjar: tempor.jar
 rundemo: tempor.jar clean
 	java -jar tempor.jar --demo
 
-.PHONY: jar
-jar: tempor.jar
-
 tempor.jar:
 	$(MAKE) -C src tempor.jar
 	cp src/tempor.jar .
