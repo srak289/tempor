@@ -7,7 +7,7 @@ runjar: tempor.jar
 	java -jar tempor.jar
 
 .PHONY: rundemo
-rundemo: tempor.jar
+rundemo: tempor.jar clean
 	java -jar tempor.jar --demo
 
 .PHONY: jar
