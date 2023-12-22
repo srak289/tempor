@@ -1,3 +1,5 @@
+// Copyright © 2023 Spencer Rak <spencer.rak@snhu.edu>
+// SPDX-License-Header: MIT
 package tempor;
 
 import java.io.IOException;
@@ -106,7 +108,6 @@ public class Console implements Completion {
         this.commands.put("report", "printReport");
     }
 
-    // begin command section
     private void showHelp(String[] args) throws IOException {
         if (args.length > 0) {
             String cmd = String.join(" ", args);
@@ -198,6 +199,11 @@ public class Console implements Completion {
                         .concat("\tuntag <task_name> <tag_name>")
                     );
                     break;
+                case "report":
+                    this.print("Help for: report\n"
+                        .concat("\treport -\tPrint a report of worked time")
+                    );
+                    break;
                 default:
                     this.error("No help for \""+cmd+"\"");
                     break;
@@ -213,6 +219,7 @@ public class Console implements Completion {
             .concat("\tcreate <task|tag> <name>\t- create a task or tag\n")
             .concat("\tdelete <task|tag> <name>\t- delete a task or tag\n")
             .concat("\ttag <task_name> <tag_name>\t- tag <task_name> with tag <tag_name>\n")
+            .concat("\treport\t- print a report of worked time\n")
             .concat("\tuntag <task_name> <tag_name>\t- remove <tag_name> from <task_name>\n")
             .concat("\tquit\t\t\t\t- quit the console\n")
             .concat("\nStrings with spaces MUST use double-quotes e.g. \"Some Tag\"\n")
@@ -336,16 +343,48 @@ public class Console implements Completion {
             this.debug("AllowedTime "+allowedTime);
         }
 
-        // we assume date was retrieved if 
-        if (allowedTime != 0) {
-            if (d == null) {
-                this.error("Could not parse date "+args[1]);
+        // if we pass d=null here the database sets the column to
+        // a time far in the future
+        try {
+            r = this.db.createTask(args[0], d, allowedTime);
+        } catch (SQLException e) {
+            if (e.getMessage().contains("UNIQUE")) {
+                this.error("Task \""+args[0]+"\" already exists");
+            } else {
+                e.printStackTrace();
             }
         }
+    }
 
-        if (d != null) {
+    private void printReport(String[] args) throws IOException {
+        // we don't care about args here for now; just print something
+        ResultSet rs;
+        try {
+            this.print("Hours worked by tag:");
+            rs = this.db.reportTag();
+            while (rs.next()) {
+                this.print(rs.getString(1), false);
+                this.print(" ", false);
+                this.print(String.format("%.2f", rs.getFloat(2)), false);
+                this.print("\n", false);
+            }
+            this.print("\n", false);
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-        //this.db.createTask();
+        try {
+            this.print("Hours worked by task:");
+            rs = this.db.reportTask();
+            while (rs.next()) {
+                this.print(rs.getString(1), false);
+                this.print(" ", false);
+                this.print(String.format("%.2f", rs.getFloat(2)), false);
+                this.print("\n", false);
+            }
+            this.print("\n", false);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     private void deleteTag(String[] args) throws IOException {
@@ -391,8 +430,9 @@ public class Console implements Completion {
             }
             while (rs.next()) {
                 this.print(rs.getString(2), false);
+                this.print("\n", false);
             }
-            this.print("");
+            this.print("\n", false);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -408,8 +448,9 @@ public class Console implements Completion {
             }
             while (rs.next()) {
                 this.print(rs.getString(2), false);
+                this.print("\n", false);
             }
-            this.print("");
+            this.print("\n", false);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -455,6 +496,7 @@ public class Console implements Completion {
         ArrayList<String> res = new ArrayList<String>();
 
         // this could maybe be cleaned up but it works for now
+        // TODO this function should split normal strings and gather the quotes
         while (true) {
             if (start != end) {
                 // we need to preserve the original args
@@ -528,7 +570,7 @@ public class Console implements Completion {
         if (end) {
             p = p += "\n\n";
         }
-        this.console.pushToStdOut("\n"+p);
+        this.console.pushToStdOut(p);
     }
 
     /**

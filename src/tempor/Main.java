@@ -1,3 +1,5 @@
+// Copyright © 2023 Spencer Rak <spencer.rak@snhu.edu>
+// SPDX-License-Header: MIT
 package tempor;
 
 import java.io.IOException;

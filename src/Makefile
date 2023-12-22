@@ -1,3 +1,7 @@
+#!/usr/bin/make -f
+# Copyright © 2023 Spencer Rak <spencer.rak@snhu.edu>
+# SPDX-License-Header: MIT
+
 ifeq (run,$(firstword $(MAKECMDGOALS)))
   RUN_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
   $(eval $(RUN_ARGS):;@:)

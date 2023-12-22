@@ -1,3 +1,5 @@
+-- Copyright © 2023 Spencer Rak <spencer.rak@snhu.edu>
+-- SPDX-License-Header: MIT
 CREATE TABLE IF NOT EXISTS task (
     id              INTEGER
         PRIMARY KEY,
@@ -116,4 +118,10 @@ CREATE VIEW IF NOT EXISTS vw_time_per_tag AS
     JOIN task_tags ON task_id = ta.id
     JOIN tag AS tg ON tag_id = tg.id
     GROUP BY tg.id
+;
+
+CREATE VIEW IF NOT EXISTS vw_time_per_task AS
+-- divide by 3600 to get hours back
+    SELECT ta.name AS task_name, ROUND(ta.time_worked/3600, 2) AS hours_worked
+    FROM task AS ta
 ;

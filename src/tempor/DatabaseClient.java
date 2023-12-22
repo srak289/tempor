@@ -1,7 +1,10 @@
+// Copyright © 2023 Spencer Rak <spencer.rak@snhu.edu>
+// SPDX-License-Header: MIT
 package tempor;
 
 import java.io.*;
 import java.sql.*;
+import java.util.Date;
 
 
 public class DatabaseClient {
@@ -26,7 +29,16 @@ public class DatabaseClient {
     private PreparedStatement psUnassignTag;
     private PreparedStatement psDeleteTag;
 
+    private PreparedStatement psReportTag;
+    private PreparedStatement psReportTask;
 
+    /**
+     * Construct a DatabaseClient object
+     * <br>
+     * @param   url     the database url
+     * @param   debug   print debug information
+     * @return          the initialized object
+     */
     public DatabaseClient(String url, boolean debug) {
         this.debug = debug;
         if (url != null) {
@@ -38,6 +50,8 @@ public class DatabaseClient {
 
     /**
      * Print error message
+     * <br>
+     * @param   line    the line to print
      */
     private void error(String line) {
         if (this.debug) {
@@ -47,6 +61,8 @@ public class DatabaseClient {
 
     /**
      * Print debug message if this.debug
+     * <br>
+     * @param   line    the line to print
      */
     private void debug(String line) {
         if (this.debug) {
@@ -117,6 +133,12 @@ public class DatabaseClient {
 
     // use prepared statements to avoid SQL issues
     private void prepareStatements() throws SQLException {
+        this.psReportTag = this.conn.prepareStatement(
+            "SELECT * FROM vw_time_per_tag"
+        );
+        this.psReportTask = this.conn.prepareStatement(
+            "SELECT * FROM vw_time_per_task"
+        );
         this.psCreateTask = this.conn.prepareStatement(
             "INSERT INTO task (name, due_by, allowed_time) VALUES (?, ?, ?)"
         );
@@ -167,7 +189,15 @@ public class DatabaseClient {
         );
     }
 
-    public int createTask(String name, Date dueBy, int allowedTime) throws SQLException {
+    /**
+     * Create a task
+     * <br>
+     * @param   name        the name of the task
+     * @param   dueBy       the due date
+     * @param   allowedTime the the amount of time allowed for the task in minutes
+     * @return              the number of rows affected
+     */
+    public int createTask(String name, java.util.Date dueBy, int allowedTime) throws SQLException {
         this.psCreateTask.setString(1, name);
         if (dueBy == null) {
             // 9999-01-01 0:0:0
@@ -183,6 +213,12 @@ public class DatabaseClient {
         return this.psCreateTask.executeUpdate();
     }
 
+    /**
+     * Search tasks with a wildcard
+     * <br>
+     * @param   name    will be wrapped as %name%
+     * @return          the result set of the search
+     */
     public ResultSet showTasks(String name) throws SQLException {
         if (name.equals("")) {
             return this.psAllTasks.executeQuery();
@@ -192,6 +228,12 @@ public class DatabaseClient {
         }
     }
 
+    /**
+     * Start a task
+     * <br>
+     * @param   name    the task to start
+     * @return          number of rows affected
+     */
     public int startTask(String name) throws SQLException {
         this.debug("Execute startTask with name = "+name);
         this.psStartTask.setString(1, name);
@@ -200,7 +242,8 @@ public class DatabaseClient {
 
     /**
      * Stops the current task
-     * Returns the name of the stopped task
+     * <br>
+     * @return  the name of the stopped task
      */
     public String stopTask() throws SQLException {
         // might be nice to run a query and return name
@@ -214,16 +257,34 @@ public class DatabaseClient {
         }
     }
 
+    /**
+     * Deletes a task
+     * <br>
+     * @param name the task to delete
+     * @return  the count of rows affected
+     */
     public int deleteTask(String name) throws SQLException {
         this.psDeleteTask.setString(1, name);
         return this.psDeleteTask.executeUpdate();
     }
 
+    /**
+     * Creates a tag
+     * <br>
+     * @param   name    the name of the tag
+     * @return          the number of rows affected
+     */
     public int createTag(String name) throws SQLException {
         this.psCreateTag.setString(1, name);
         return this.psCreateTag.executeUpdate();
     }
 
+    /**
+     * Search tags with a wildcard
+     * <br>
+     * @param   name    will be wrapped as %name%
+     * @return          the result set of the search
+     */
     public ResultSet showTags(String name) throws SQLException {
         if (name.equals("")) {
             return this.psAllTags.executeQuery();
@@ -233,20 +294,58 @@ public class DatabaseClient {
         }
     }
 
+    /**
+     * Delete a tag
+     * <br>
+     * @param   name    the tag to delete
+     * @return          the number of rows affected
+     */
     public int deleteTag(String name) throws SQLException {
         this.psDeleteTag.setString(1, name);
         return this.psDeleteTag.executeUpdate();
     }
 
+    /**
+     * Assign a tag to a task
+     * <br>
+     * @param   task    the task to reference
+     * @param   tag     the tag to assign to the task
+     * @return          the number of rows affected
+     */
     public int assignTag(String task, String tag) throws SQLException {
         this.psAssignTag.setString(1, task);
         this.psAssignTag.setString(2, tag);
         return this.psAssignTag.executeUpdate();
     }
 
+    /**
+     * Remove a tag from a task
+     * <br>
+     * @param   task    the task to reference
+     * @param   tag     the tag to remove from the task
+     * @return          the number of rows affected
+     */
     public int unassignTag(String task, String tag) throws SQLException {
         this.psUnassignTag.setString(1, task);
         this.psUnassignTag.setString(2, tag);
         return this.psUnassignTag.executeUpdate();
+    }
+
+    /**
+     * Generate a time report by tag
+     * <br>
+     * @return  The result set of the query
+     */
+    public ResultSet reportTag() throws SQLException {
+        return this.psReportTag.executeQuery();
+    }
+
+    /**
+     * Generate a time report by task
+     * <br>
+     * @return  The result set of the query
+     */
+    public ResultSet reportTask() throws SQLException {
+        return this.psReportTask.executeQuery();
     }
 }
