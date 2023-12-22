@@ -24,5 +24,5 @@ build:
 .PHONY: clean
 clean:
 	$(MAKE) -C src clean
-	rm tempor.jar
-	rm time.db
+	-rm tempor.jar
+	-rm time.db
