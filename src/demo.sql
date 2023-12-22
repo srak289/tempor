@@ -1,3 +1,5 @@
+-- Copyright © 2023 Spencer Rak <spencer.rak@snhu.edu>
+-- SPDX-License-Header: MIT
 INSERT INTO task (id, name, time_started, time_stopped, time_worked) VALUES
     (
         0,
